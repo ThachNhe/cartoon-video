@@ -25,10 +25,11 @@ CACHE_DIR = ROOT / "assets" / "voice"
 REF_DIR = ROOT / "assets" / "voice_ref"
 FONT_DIR = ROOT / "assets" / "fonts"
 
-BG = "#FFF6E9"
+BG = "#1B1E3C"
 ACCENT = "#FFD54F"
 HEADLINE = "#FF6B35"
-TEXT_MUTED = "#5C5F7A"
+TEXT_MUTED = "#9AA0C8"
+TEXT_LIGHT = "#E8EAF6"
 CONSOLE_GREEN = "#A6E3A1"
 FRAME_COLORS = ["#80DEEA", "#A5D6A7", "#FFF59D", "#FFAB91", "#CE93D8"]
 INK = "#1B1B2F"
@@ -108,9 +109,18 @@ def make_sfx():
     _save("rimshot_ba", _env(_sweep(220, 160, 0.12) + rng.normal(size=int(SR * 0.12)) * 0.3, decay_power=2), 0.5)
     _save("rimshot_dum", _env(_sweep(160, 110, 0.15), decay_power=2), 0.6)
 
+    # Keyboard click: a bright, very short tick.
+    t = _t_axis(0.035)
+    click = rng.normal(size=t.size) * np.exp(-t * 180) + np.sin(2 * np.pi * 2400 * t) * np.exp(-t * 250) * 0.5
+    _save("key", np.diff(click, prepend=0), 0.35)
+
+    # Spellcheck "oops": two descending beeps.
+    oops = np.concatenate([_env(_sweep(520, 500, 0.12), decay_power=1.5), _env(_sweep(390, 370, 0.18), decay_power=1.5)])
+    _save("oops", oops, 0.35)
+
 
 SFX_NAMES = ("pop", "blip", "boing", "slide_down", "whoosh", "alarm", "crash", "ding", "rimshot_tss",
-             "rimshot_ba", "rimshot_dum")
+             "rimshot_ba", "rimshot_dum", "key", "oops")
 
 
 # ------------------------------------------------------------------- narration
@@ -232,7 +242,7 @@ class Bit(VGroup):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        ground = Ellipse(width=1.5, height=0.22, fill_color=INK, fill_opacity=0.16, stroke_width=0).move_to(DOWN * 1.13)
+        ground = Ellipse(width=1.5, height=0.22, fill_color=BLACK, fill_opacity=0.3, stroke_width=0).move_to(DOWN * 1.13)
         feet = VGroup(*[
             RoundedRectangle(width=0.46, height=0.3, corner_radius=0.13, fill_color=self.LIMB, fill_opacity=1,
                              stroke_color=INK, stroke_width=4).move_to([x, -0.98, 0])
@@ -240,7 +250,7 @@ class Bit(VGroup):
         ])
         self.arms = VGroup(*[self._make_arm(side) for side in (-1, 1)])
         self._arm_angles = [0.0, 0.0]
-        antenna = Line(UP * 0.9, UP * 1.26, stroke_color=INK, stroke_width=5)
+        antenna = Line(UP * 0.9, UP * 1.26, stroke_color=self.LIMB, stroke_width=6)
         glow = Circle(radius=0.24, fill_color=ACCENT, fill_opacity=0.3, stroke_width=0).move_to(UP * 1.38)
         self.bulb = Circle(radius=0.12, fill_color=ACCENT, fill_opacity=1, stroke_color=INK, stroke_width=4).move_to(UP * 1.38)
         self.body = RoundedRectangle(width=1.6, height=1.8, corner_radius=0.55, stroke_color=INK, stroke_width=5)
@@ -455,7 +465,7 @@ class SpeechBubble(VGroup):
         fill = Polygon(a, b, tip, fill_color=WHITE, fill_opacity=1, stroke_width=0)
         edges = VMobject().set_points_as_corners([a, tip, b]).set_stroke(INK, 4)
         self.add(fill, edges)
-        shadow = VGroup(box.copy(), fill.copy()).set_fill(INK, 0.15).set_stroke(width=0).shift(DR * 0.07)
+        shadow = VGroup(box.copy(), fill.copy()).set_fill(BLACK, 0.3).set_stroke(width=0).shift(DR * 0.07)
         self.add_to_back(shadow)
         return self
 
@@ -515,7 +525,8 @@ class Recursion(Scene):
         animation (wave, point...) played while talking.
         """
         bubble = SpeechBubble(text, font_size=font_size)
-        bubble.next_to(bit, direction, buff=0.2).shift(shift)
+        # Anchor on head and body only, so raised arms don't push the bubble around.
+        bubble.next_to(VGroup(bit.body, bit.bulb), direction, buff=0.2).shift(shift)
         half_w, half_h = config.frame_width / 2 - 0.25, config.frame_height / 2 - 0.25
         bubble.shift(RIGHT * max(0, -half_w - bubble.get_left()[0]) + LEFT * max(0, bubble.get_right()[0] - half_w))
         bubble.shift(DOWN * max(0, bubble.get_top()[1] - half_h))
@@ -540,23 +551,24 @@ class Recursion(Scene):
         return None
 
     def background(self):
-        """Warm paper backdrop with pastel blobs; oversized so screen shakes never reveal an edge."""
-        paper = Rectangle(width=config.frame_width + 2, height=config.frame_height + 2,
-                          fill_color=BG, fill_opacity=1, stroke_width=0)
-        blobs = VGroup(*[
-            Circle(radius=r, fill_color=c, fill_opacity=1, stroke_width=0).move_to(pos)
-            for r, c, pos in [(3.0, "#FFE3C2", [-7.0, 4.0, 0]), (3.8, "#DDF1EC", [7.4, -4.4, 0]),
-                              (1.6, "#E9E4FF", [6.6, 3.6, 0])]
+        """Night sky: deep navy, soft planets in the corners, faint stars. Oversized so shakes never show an edge."""
+        sky = Rectangle(width=config.frame_width + 2, height=config.frame_height + 2,
+                        fill_color=BG, fill_opacity=1, stroke_width=0)
+        planets = VGroup(
+            Circle(radius=3.2, fill_color="#232756", fill_opacity=1, stroke_width=0).move_to([-7.2, 4.2, 0]),
+            Circle(radius=4.0, fill_color="#20244F", fill_opacity=1, stroke_width=0).move_to([7.6, -4.6, 0]),
+        )
+        rng = np.random.default_rng(4)
+        stars = VGroup(*[
+            Dot([rng.uniform(-7, 7), rng.uniform(-4, 4), 0], radius=rng.uniform(0.012, 0.03),
+                color=WHITE, fill_opacity=rng.uniform(0.15, 0.4))
+            for _ in range(70)
         ])
-        dots = VGroup(*[
-            Dot([x, y, 0], radius=0.022, color=INK, fill_opacity=0.08)
-            for x in np.arange(-7.5, 8, 0.5) for y in np.arange(-4.5, 5, 0.5)
-        ])
-        return VGroup(paper, blobs, dots)
+        return VGroup(sky, planets, stars)
 
     def shadow(self, mob):
-        """Soft drop shadow to lift panels off the light background."""
-        return mob.copy().set_fill(INK, 0.18).set_stroke(width=0).shift(DR * 0.08)
+        """Soft drop shadow to lift panels off the background."""
+        return mob.copy().set_fill(BLACK, 0.35).set_stroke(width=0).shift(DR * 0.08)
 
     def make_code(self, source, width=6.2):
         def build(src):
@@ -594,41 +606,121 @@ class Recursion(Scene):
             make_sfx()
         self.camera.background_color = BG
         self.add(self.background())
-        self.intro()
-        bit = self.meet_bit()
+        bit, title = self.intro()
+        bit = self.meet_bit(bit, title)
         bit, code = self.happy_path(bit)
         self.stack_overflow(bit, code)
         self.punchline()
         self.outro()
 
-    def intro(self):
-        title = Text("RECURSION", font=FONT, weight=BOLD, font_size=120, color=HEADLINE)
-        self.sfx("whoosh")
-        self.play(LaggedStart(*[FadeIn(ch, shift=DOWN * 0.6, scale=1.6) for ch in title], lag_ratio=0.08), run_time=1.0)
-        spoken = self.voice("Recursion.")
-        self.wait(max(1.0, spoken + 0.3))
-        self.sfx("whoosh")
-        self.play(FadeOut(title, shift=UP * 0.6), run_time=0.45)
+    def laptop(self):
+        """Laptop seen from behind its lid, so Bit can type at the camera."""
+        lid = RoundedRectangle(width=2.3, height=1.15, corner_radius=0.12, fill_color="#3B4175", fill_opacity=1,
+                               stroke_color=INK, stroke_width=5)
+        glow = Circle(radius=0.24, fill_color=ACCENT, fill_opacity=0.22, stroke_width=0).move_to(lid)
+        logo = Text("{ }", font=MONO, weight=BOLD, font_size=30, color=ACCENT).move_to(lid)
+        base = RoundedRectangle(width=2.9, height=0.2, corner_radius=0.08, fill_color="#4A4F70", fill_opacity=1,
+                                stroke_color=INK, stroke_width=4).next_to(lid, DOWN, buff=-0.02)
+        shadow = Ellipse(width=3.0, height=0.2, fill_color=BLACK, fill_opacity=0.3, stroke_width=0).next_to(base, DOWN, buff=0)
+        return VGroup(shadow, lid, glow, logo, base)
 
-    def meet_bit(self):
-        bit = Bit().move_to(DOWN * 0.8 + UP * 7)
-        self.add(bit)
-        self.play(bit.animate.shift(DOWN * 7), rate_func=rate_functions.ease_in_quad, run_time=0.45)
-        self.sfx("boing")
-        self.play(
-            bit.animate(rate_func=there_and_back, run_time=0.35)
-            .stretch(0.72, 1, about_edge=DOWN).stretch(1.18, 0, about_edge=DOWN)
-        )
+    def intro(self):
+        """Bit types the title on a laptop, typos it, and fixes it."""
+        final = Text("RECURSION", font=FONT, weight=BOLD, font_size=120, color=HEADLINE).move_to(UP * 2.0)
+        typo = Text("RECURSOIN", font=FONT, weight=BOLD, font_size=120, color=HEADLINE)
+        typo.align_to(final, LEFT).align_to(final, DOWN)
+        bit = Bit().move_to(DOWN * 1.7)
+        laptop = self.laptop()
+        laptop.shift(UP * (-2.45 - laptop[1].get_top()[1]))  # lid hides Bit's belly, hands rest on its edge
+
+        self.sfx("whoosh")
+        self.play(FadeIn(bit, shift=UP * 1.5), FadeIn(laptop, shift=UP * 1.5), run_time=0.5,
+                  rate_func=rate_functions.ease_out_back)
         self.play(bit.blink())
-        self.say(bit, "Hi! I'm Bit.", UR)
+
+        cursor = Rectangle(width=0.07, height=final.height * 1.1, fill_color=TEXT_LIGHT, fill_opacity=1, stroke_width=0)
+        blink = {"t": 0.0}
+
+        def blink_cursor(m, dt):
+            blink["t"] += dt
+            m.set_opacity(1 if blink["t"] % 0.8 < 0.45 else 0)
+
+        def cursor_after(letter):
+            x = letter.get_right()[0] + 0.12 if letter is not None else final.get_left()[0]
+            cursor.move_to([x, final.get_y(), 0])
+            blink["t"] = 0.0  # stay solid while typing
+
+        def keystroke(k, letter=None, remove=None, after=None, pause=0.0):
+            hand = k % 2
+            self.sfx("key", gain=-2 if k % 3 else 0)
+            if remove is not None:
+                self.remove(remove)
+            cursor_after(after if after is not None else letter)
+            tap = Succession(bit.arm_to(hand, 34, run_time=0.06), bit.arm_to(hand, Bit.REST, run_time=0.06))
+            self.play(*([FadeIn(letter, scale=1.4)] if letter is not None else []), tap, run_time=0.12)
+            if pause:
+                self.wait(pause)
+
+        cursor_after(None)
+        cursor.add_updater(blink_cursor)
+        self.add(cursor)
+        self.play(bit.look(DOWN), run_time=0.2)
+        self.wait(0.3)
+
+        # R E C U R S O I N ... with a typist's uneven rhythm.
+        pauses = [0.05, 0.02, 0.08, 0.02, 0.03, 0.12, 0.02, 0.03, 0.0]
+        for k, letter in enumerate(typo):
+            keystroke(k, letter, pause=pauses[k])
+
+        # Spellcheck catches it; Bit freezes and looks at us.
+        squiggle = ParametricFunction(
+            lambda t: np.array([t, 0.07 * np.sin(t * 26), 0]), t_range=[0, VGroup(*typo[6:]).width],
+            stroke_color=RED, stroke_width=6,
+        ).next_to(VGroup(*typo[6:]), DOWN, buff=0.12)
+        self.wait(0.25)
+        self.sfx("oops")
+        self.play(Create(squiggle), bit.look(UP), bit.express("flat", "raised"), run_time=0.35)
+        self.wait(0.35)
+        self.play(bit.look(ORIGIN), run_time=0.2)
+        self.wait(0.6)
+
+        # Backspace x3, then retype the right letters.
+        self.play(bit.look(DOWN), bit.express("smile", "neutral"), FadeOut(squiggle), run_time=0.2)
+        for k, letter in enumerate(reversed(typo[6:])):
+            keystroke(k, remove=letter, after=typo[7 - k])  # N, I, O out; cursor steps back
+        for k, letter in enumerate(final[6:]):
+            keystroke(k + 1, letter, pause=0.03)
+
+        # Fixed. Ding!
+        title = VGroup(*typo[:6], *final[6:])
+        for letter in title:
+            self.remove(letter)
+        self.add(title)
+        cursor.clear_updaters()
+        self.remove(cursor)
+        self.sfx("ding")
+        self.play(title.animate(rate_func=there_and_back).scale(1.06), bit.look(ORIGIN), bit.express("grin", "smug"),
+                  run_time=0.35)
+        spoken = self.voice("Recursion.")
+        self.play(bit.talk(max(spoken, 0.5)))
+
+        self.sfx("whoosh")
+        self.play(FadeOut(laptop, shift=DOWN * 2), run_time=0.4, rate_func=rush_into)
+        self.play(bit.express("smile", "neutral"), run_time=0.15)
+        return bit, title
+
+    def meet_bit(self, bit, title):
+        self.say(bit, "Hi! I'm Bit.", UR, gesture=bit.wave())
         self.play(bit.set_mouth("grin"), run_time=0.2)
-        self.say(bit, "Today we're learning\nRECURSION.", UR)
-        self.play(bit.set_mouth("smile"), run_time=0.2)
+        self.say(bit, "Today we're learning\nRECURSION.", UR, gesture=bit.point(0, 165))
+        self.sfx("whoosh")
+        self.play(FadeOut(title, shift=UP * 0.8), bit.arms_rest(run_time=0.35), bit.set_mouth("smile"), run_time=0.4)
         self.say(bit, "Recursion is when a\nfunction calls ITSELF.", UR)
         self.play(bit.look(LEFT), run_time=0.2)
         self.play(bit.look(RIGHT), run_time=0.2)
-        self.play(bit.look(ORIGIN), bit.set_mouth("smug"), run_time=0.2)
+        self.play(bit.look(ORIGIN), bit.express("smug", "smug"), run_time=0.2)
         self.say(bit, "Sounds scary?\nNah. Watch this.", UR)
+        self.play(bit.express("smile", "neutral"), run_time=0.15)
         return bit
 
     def happy_path(self, bit):
@@ -761,7 +853,7 @@ class Recursion(Scene):
         depth = ValueTracker(0)
         depth_label = always_redraw(lambda: Text(
             f"depth: {int(depth.get_value())}", font=MONO, font_size=30,
-            color=interpolate_color(ManimColor(INK), ManimColor(RED), min(1, depth.get_value() / 600)),
+            color=interpolate_color(ManimColor(TEXT_LIGHT), ManimColor(RED), min(1, depth.get_value() / 600)),
         ).move_to([1.4, 3.35, 0]))
         self.play(FadeIn(depth_label), bit.express("smile", "neutral"), bit.look(UL), run_time=0.3)
 
@@ -883,7 +975,7 @@ class Recursion(Scene):
 
         # The joke recurses: zoom into an endless tunnel of itself.
         border = Rectangle(width=config.frame_width - 0.3, height=config.frame_height - 0.3,
-                           stroke_color=INK, stroke_width=6)
+                           stroke_color=TEXT_LIGHT, stroke_width=6)
         self.play(Create(border), run_time=0.4)
         world = VGroup(border, bit, bubble)
         pivot = np.array([4.6, -2.3, 0])
