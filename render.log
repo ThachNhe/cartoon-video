@@ -1,0 +1,155 @@
+Manim Community v0.22.0
+
+[10/16/26 22:55:03] INFO     Caching disabled.              cairo_renderer.py:89
+Animation 0: LaggedStart(Group):   0%|          | 0/30 [00:00<?, ?it/s]Animation 0: LaggedStart(Group):  43%|████▎     | 13/30 [00:00<00:00, 125.06it/s]Animation 0: LaggedStart(Group): 100%|██████████| 30/30 [00:00<00:00, 145.38it/s]                                                                                 [10/16/26 22:55:04] INFO     Animation 0 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00000.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+[10/16/26 22:55:05] INFO     Animation 1 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00001.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 2: FadeOut(Text('RECURSION')):   0%|          | 0/14 [00:00<?, ?it/s]                                                                                                   INFO     Animation 2 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00002.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 3: _MethodAnimation(Bit of 14 submobjects):   0%|          | 0/14 [00:00<?, ?it/s]                                                                                                                INFO     Animation 3 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00003.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 4: _MethodAnimation(Bit of 14 submobjects):   0%|          | 0/11 [00:00<?, ?it/s]                                                                                            [10/16/26 22:55:06] INFO     Animation 4 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00004.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 5: AnimationGroup(Group):   0%|          | 0/7 [00:00<?, ?it/s]                                                                                             INFO     Animation 5 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00005.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 6: GrowFromPoint(SpeechBubble of 5 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]                                                                                                                    INFO     Animation 6 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00006.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 7: Succession(Group):   0%|          | 0/68 [00:00<?, ?it/s]Animation 7: Succession(Group):  28%|██▊       | 19/68 [00:00<00:00, 175.58it/s]Animation 7: Succession(Group):  54%|█████▍    | 37/68 [00:00<00:00, 159.35it/s]Animation 7: Succession(Group):  79%|███████▉  | 54/68 [00:00<00:00, 71.12it/s] Animation 7: Succession(Group):  96%|█████████▌| 65/68 [00:00<00:00, 69.59it/s]                                                                               [10/16/26 22:55:07] INFO     Animation 7 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00007.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+                    INFO     Animation 8 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00008.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 9: FadeOut(SpeechBubble of 5 submobjects):   0%|          | 0/6 [00:00<?, ?it/s]                                                                                          [10/16/26 22:55:08] INFO     Animation 9 : Partial      scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00009.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 10: Transform(Arc):   0%|          | 0/6 [00:00<?, ?it/s]                                                                                       INFO     Animation 10 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00010.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 11: GrowFromPoint(SpeechBubble of 5 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]                                                                                                                     INFO     Animation 11 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00011.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 12: Succession(Group):   0%|          | 0/45 [00:00<?, ?it/s]Animation 12: Succession(Group):  40%|████      | 18/45 [00:00<00:00, 177.86it/s]Animation 12: Succession(Group):  80%|████████  | 36/45 [00:00<00:00, 165.58it/s]                                                                                 [10/16/26 22:55:09] INFO     Animation 12 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00012.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+                    INFO     Animation 13 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00013.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 14: FadeOut(SpeechBubble of 5 submobjects):   0%|          | 0/6 [00:00<?, ?it/s]                                                                                                               INFO     Animation 14 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00014.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 15: Transform(Arc):   0%|          | 0/6 [00:00<?, ?it/s]                                                                                       INFO     Animation 15 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00015.mp4'                          
+[10/16/26 22:55:10] INFO     Caching disabled.              cairo_renderer.py:89
+Animation 16: GrowFromPoint(SpeechBubble of 5 submobjects):   0%|          | 0/8 [00:00<?, ?it/s]                                                                                                                     INFO     Animation 16 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00016.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+Animation 17: Succession(Group):   0%|          | 0/104 [00:00<?, ?it/s]Animation 17: Succession(Group):  24%|██▍       | 25/104 [00:00<00:00, 242.67it/s]Animation 17: Succession(Group):  48%|████▊     | 50/104 [00:00<00:00, 192.01it/s]Animation 17: Succession(Group):  67%|██████▋   | 70/104 [00:00<00:00, 66.76it/s] Animation 17: Succession(Group):  80%|███████▉  | 83/104 [00:01<00:00, 68.14it/s]Animation 17: Succession(Group):  90%|█████████ | 94/104 [00:01<00:00, 65.52it/s]Animation 17: Succession(Group):  99%|█████████▉| 103/104 [00:01<00:00, 66.91it/s]                                                                                  [10/16/26 22:55:11] INFO     Animation 17 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00017.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
+[10/16/26 22:55:12] INFO     Animation 18 : Partial     scene_file_writer.py:173
+                             movie file written in                              
+                             '/home/thachdvxx02/source-                         
+                             code/web/cartoon-video/med                         
+                             ia/videos/recursion/1080p3                         
+                             0/partial_movie_files/Recu                         
+                             rsion/uncached_00018.mp4'                          
+                    INFO     Caching disabled.              cairo_renderer.py:89
