@@ -6,6 +6,10 @@ the NeuTTS narrator and the synthesized sound effects.
 Render:  .venv/bin/manim -qh --fps 30 recursion.py Recursion
 Preview: .venv/bin/manim -ql recursion.py Recursion
 Set BIT_VOICE=0 to render without narration.
+
+Channel avatar (2048x2048 PNG; the round one has a transparent outside):
+    .venv/bin/manim -s -r 2048,2048 recursion.py ChannelAvatar
+    .venv/bin/manim -s -t -r 2048,2048 recursion.py ChannelAvatarRound
 """
 
 import hashlib
@@ -282,7 +286,12 @@ class Bit(VGroup):
         self.brows = self.make_brows("neutral")
         self.mouth = self.make_mouth("smile")
         self.add(self.brows, self.mouth)
+        self._head_parts = [antenna, glow, self.bulb, self.body, gloss, cheeks, self.eyes, self.pupils]
         self.pose_arms(self.REST, self.REST)
+
+    def head(self):
+        """Just the head (no arms, feet or ground shadow), e.g. for the channel icon."""
+        return VGroup(*self._head_parts, self.brows, self.mouth)
 
     @staticmethod
     def _make_arm(side):
@@ -432,6 +441,118 @@ class Bit(VGroup):
         return drop.move_to(self.face_point(0.78, 0.7))
 
 
+# -------------------------------------------------------------------- branding
+CHANNEL = "BitByBit"
+
+
+def avatar_head():
+    """Bit's head drawn for icon sizes: bold outline, big double-glint eyes, open smile."""
+    outline = 9
+    stem = Line([0, 0.8, 0], [0, 1.28, 0], stroke_color=Bit.LIMB, stroke_width=11, cap_style=CapStyleType.ROUND)
+    glow = Circle(radius=0.34, fill_color=ACCENT, fill_opacity=0.35, stroke_width=0).move_to([0, 1.42, 0])
+    bulb = Circle(radius=0.17, fill_color=ACCENT, fill_opacity=1, stroke_color=INK, stroke_width=outline - 3)
+    bulb.move_to([0, 1.42, 0])
+    ears = VGroup(*[
+        RoundedRectangle(width=0.26, height=0.62, corner_radius=0.12, fill_color=Bit.LIMB, fill_opacity=1,
+                         stroke_color=INK, stroke_width=outline - 2).move_to([side * 1.07, -0.02, 0])
+        for side in (-1, 1)
+    ])
+    face = RoundedRectangle(width=2.1, height=1.8, corner_radius=0.72, stroke_color=INK, stroke_width=outline)
+    face.set_fill([Bit.BODY_TOP, Bit.BODY_BOTTOM], opacity=1).set_sheen_direction(DOWN)
+    gloss = VGroup(
+        RoundedRectangle(width=0.16, height=0.5, corner_radius=0.08, fill_color=WHITE, fill_opacity=0.65,
+                         stroke_width=0).rotate(-0.25).move_to([-0.78, 0.3, 0]),
+        Dot([-0.66, 0.64, 0], radius=0.065, color=WHITE, fill_opacity=0.65),
+    )
+    eyes, pupils = VGroup(), VGroup()
+    for side in (-1, 1):
+        eye = Ellipse(width=0.52, height=0.64, fill_color=WHITE, fill_opacity=1, stroke_color=INK,
+                      stroke_width=outline - 4).move_to([side * 0.4, 0.14, 0])
+        pupil = VGroup(
+            Circle(radius=0.165, fill_color=INK, fill_opacity=1, stroke_width=0),
+            Dot(UR * 0.06, radius=0.06, color=WHITE),
+            Dot(DL * 0.075, radius=0.028, color=WHITE),
+        ).move_to(eye.get_center() + DOWN * 0.03 + LEFT * side * 0.02)
+        eyes.add(eye)
+        pupils.add(pupil)
+    brows = VGroup(*[
+        Arc(radius=0.22, start_angle=PI * 0.25, angle=PI * 0.5, stroke_color=INK, stroke_width=outline,
+            cap_style=CapStyleType.ROUND).move_to([side * 0.4, 0.62, 0])
+        for side in (-1, 1)
+    ])
+    cheeks = VGroup(*[
+        Ellipse(width=0.3, height=0.17, fill_color="#FF8A9A", fill_opacity=0.8, stroke_width=0).move_to([side * 0.72, -0.22, 0])
+        for side in (-1, 1)
+    ])
+    mouth = Arc(radius=0.3, start_angle=PI, angle=PI)
+    mouth.add_line_to(mouth.get_start())
+    mouth.set_fill(MOUTH_FILL, 1).set_stroke(INK, outline - 3).move_to([0, -0.38, 0])
+    tongue = Ellipse(width=0.26, height=0.13, fill_color="#FF7A8A", fill_opacity=1, stroke_width=0)
+    tongue.move_to(mouth.get_bottom() + UP * 0.1)
+    head = VGroup(stem, glow, bulb, ears, face, gloss, cheeks, eyes, pupils, brows, mouth, tongue)
+    # Soft drop shadow from the solid shapes only (a glow's shadow would look like a smudge).
+    shadow = VGroup(ears, face, bulb).copy().set_fill(BLACK, 0.22).set_stroke(width=0).shift(DOWN * 0.12 + RIGHT * 0.06)
+    return VGroup(shadow, head).rotate(-6 * DEGREES)
+
+
+def sunburst(size=1024, round=False, inner="#FFB37A", outer="#FF5A1F", rays=18):
+    """Orange radial gradient with soft rays, drawn per pixel so it never bands."""
+    yy, xx = np.mgrid[0:size, 0:size].astype(np.float32)
+    dx, dy = (xx - size / 2) / (size / 2), (yy - size / 2) / (size / 2)
+    r = np.hypot(dx, dy)
+    t = np.clip(r / 1.25, 0, 1)[..., None]
+    img = color_to_rgb(inner) * (1 - t) ** 1.4 + color_to_rgb(outer) * (1 - (1 - t) ** 1.4)
+    beam = (np.sin(np.arctan2(dy, dx) * rays) > 0).astype(np.float32)[..., None]
+    img = img + beam * 0.045 * (0.4 + t)
+    img = img + np.random.default_rng(1).normal(0, 0.004, img.shape)  # fine grain against banding
+    alpha = np.clip((1 - r) * size / 2, 0, 1) if round else np.ones_like(r)  # anti-aliased circle edge
+    rgba = np.concatenate([np.clip(img, 0, 1), alpha[..., None]], axis=-1)
+    return ImageMobject((rgba * 255).astype(np.uint8))
+
+
+def channel_icon(size=1024, round=True, height=8, head_height=5.4, head_y=-0.05):
+    """The channel avatar: Bit's head on the orange sunburst, `height` units tall.
+
+    `head_height` and `head_y` place the head on an 8-unit disc; a taller head
+    leaves a thinner orange rim. Outlines are designed for an 8-unit avatar and
+    scale with it; otherwise a small watermark would drown in ink and a large
+    export would look thin.
+    """
+    backdrop = sunburst(size, round).set(height=height)
+    head = avatar_head().set(height=head_height).move_to(UP * head_y)
+    head.scale(height / 8, about_point=ORIGIN, scale_stroke=True)
+    return Group(backdrop, head)
+
+
+def flatten(mob, opacity=1.0, px_per_unit=270):
+    """Rasterize `mob` on a transparent canvas, so it fades as one picture.
+
+    Fading a mobject fades each layer on its own, letting outlines and the
+    shapes underneath show through each other.
+    """
+    pad = 0.05
+    w, h = mob.width + 2 * pad, mob.height + 2 * pad
+    cam = Camera(frame_width=w, frame_height=h, pixel_width=int(w * px_per_unit), pixel_height=int(h * px_per_unit),
+                 frame_center=mob.get_center(), background_opacity=0)
+    cam.capture_mobject(mob)
+    return ImageMobject(cam.get_image()).set(height=h).move_to(mob.get_center()).set_opacity(opacity)
+
+
+def wordmark(name=CHANNEL, size=72, color=TEXT_LIGHT):
+    """The name in Poppins, with Bit's glowing antenna bulb as the dot of each "i" in "Bit"."""
+    spelled = name.replace("Bit", "B\u0131t")  # dotless i, so the bulb can be its dot
+    word = Text(spelled, font=FONT, weight=BOLD, font_size=size, color=color)
+    bulbs = VGroup()
+    glyphs = [ch for ch in spelled if not ch.isspace()]
+    for i, ch in enumerate(glyphs):
+        if ch == "\u0131":
+            k = size / 72
+            halo = Circle(radius=0.16 * k, fill_color=ACCENT, fill_opacity=0.3, stroke_width=0)
+            halo.next_to(word[i], UP, buff=0.05 * k)
+            bulbs.add(halo, Circle(radius=0.085 * k, fill_color=ACCENT, fill_opacity=1, stroke_width=0).move_to(halo))
+    return VGroup(word, bulbs)
+
+
 class SpeechBubble(VGroup):
     """Rounded comic bubble; call point_tail_to() after positioning it."""
 
@@ -500,7 +621,24 @@ class Recursion(Scene):
         parent.add(mob)
 
     def top_level(self):
-        return [m for m in self.mobjects if not any(m is not o and m in o.get_family() for o in self.mobjects)]
+        """Top-level mobjects, excluding the channel watermark (it never shakes or fades with a scene)."""
+        mark = getattr(self, "mark", None)
+        return [m for m in self.mobjects
+                if m is not mark and not any(m is not o and m in o.get_family() for o in self.mobjects)]
+
+    def watermark(self):
+        # A bigger head than the avatar's, so only a thin orange rim shows at this size.
+        icon = channel_icon(size=256, height=0.42, head_height=6.8, head_y=-0.14)
+        mark = Group(icon, wordmark(size=19, color=WHITE)).arrange(RIGHT, buff=0.12)
+        return flatten(mark, opacity=0.42).to_corner(UR, buff=0.21)
+
+    def stage(self):
+        """Empty the scene down to the background and the watermark."""
+        self.clear()
+        self.add(self.background())
+        if not hasattr(self, "mark"):
+            self.mark = self.watermark()
+        self.add_foreground_mobject(self.mark)
 
     def shake(self, strength=0.15, times=6):
         everything = Group(*self.top_level())
@@ -605,7 +743,7 @@ class Recursion(Scene):
         if any(not (SFX / f"{name}.wav").exists() for name in SFX_NAMES):
             make_sfx()
         self.camera.background_color = BG
-        self.add(self.background())
+        self.stage()
         bit, title = self.intro()
         bit = self.meet_bit(bit, title)
         bit, code = self.happy_path(bit)
@@ -731,7 +869,8 @@ class Recursion(Scene):
         ).next_to(code, DOWN, buff=0.3, aligned_edge=LEFT)
         panel_label = Text("OUTPUT", font=MONO, font_size=20, color=GRAY_B).next_to(
             panel.get_corner(UL), DR, buff=0.15)
-        stack_title = Text("CALL STACK", font=FONT, weight=BOLD, font_size=26, color=TEXT_MUTED).move_to([STACK_X, 3.4, 0])
+        stack_title = Text("CALL STACK", font=FONT, weight=BOLD, font_size=26, color=TEXT_MUTED).move_to(
+            [STACK_X, STACK_BASE_Y - 0.35, 0])
         base = Line([STACK_X - 1.8, STACK_BASE_Y, 0], [STACK_X + 1.8, STACK_BASE_Y, 0], color=TEXT_MUTED, stroke_width=5)
         code_shadow, panel_shadow = self.shadow(code.background), self.shadow(panel)
 
@@ -948,8 +1087,7 @@ class Recursion(Scene):
         self.wait(1.2)
         self.sfx("whoosh")
         self.play(*[FadeOut(m) for m in self.top_level()[1:]], run_time=0.6)
-        self.clear()
-        self.add(self.background())
+        self.stage()
 
     def punchline(self):
         bit = Bit().move_to([-4.6, -0.6, 0])
@@ -997,8 +1135,7 @@ class Recursion(Scene):
             self.add(deeper)
             self.play(tunnel.animate.scale(1 / ratio, about_point=pivot), run_time=0.9, rate_func=linear)
         self.play(FadeOut(tunnel), run_time=0.4)
-        self.clear()
-        self.add(self.background())
+        self.stage()
 
     def outro(self):
         headline = Text("Always write your base case.", font=FONT, weight=BOLD, font_size=56, color=HEADLINE).to_edge(UP, buff=0.9)
@@ -1029,4 +1166,21 @@ class Recursion(Scene):
         self.play(bit.wave(i=0))
         self.play(bit.blink())
         self.wait(0.8)
-        self.play(*[FadeOut(m) for m in self.top_level()], run_time=0.8)
+        self.play(*[FadeOut(m) for m in [*self.top_level(), self.mark]], run_time=0.8)
+
+
+class ChannelAvatar(Scene):
+    """Square avatar for YouTube / Facebook (they crop it to a circle)."""
+
+    round = False
+
+    def construct(self):
+        # With a square -r, manim keeps the 14.2-unit frame width and stretches the height to match.
+        side = max(config.frame_width, config.frame_height)
+        self.add(channel_icon(size=config.pixel_height, round=self.round, height=side))
+
+
+class ChannelAvatarRound(ChannelAvatar):
+    """Circular avatar with a transparent outside; render with -t."""
+
+    round = True
