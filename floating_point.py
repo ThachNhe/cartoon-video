@@ -53,7 +53,7 @@ class FloatingPoint(BitScene):
                          fill_color=RED, fill_opacity=0.22)
         console = self.repl().move_to(UP * 0.7)  # below the hook question
         prompt = Text(">>> 0.1 + 0.2", font=MONO, font_size=40, color=PROMPT)
-        result = Text(WEIRD, font=MONO, weight=BOLD, font_size=48, color=CONSOLE_GREEN)
+        result = Text(WEIRD, font=MONO, weight=BOLD, font_size=42, color=CONSOLE_GREEN)
         result[3:].set_color("#FF6B6B")  # the junk after 0.3
         VGroup(prompt, result).arrange(DOWN, aligned_edge=LEFT, buff=0.25).move_to(console[1])
         underline = Line(result[3:].get_corner(DL), result[3:].get_corner(DR), stroke_color="#FF4D4D",

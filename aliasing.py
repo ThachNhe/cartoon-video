@@ -62,7 +62,7 @@ class Aliasing(BitScene):
                          fill_color=RED, fill_opacity=0.22)
         console = self.console(7.2, 2.6).move_to(UP * 0.9)
         prompt = Text(">>> print(a)", font=MONO, font_size=40, color=TEXT_MUTED)
-        result = Text("[1, 2, 3, 4]", font=MONO, weight=BOLD, font_size=64, color=CONSOLE_GREEN)
+        result = Text("[1, 2, 3, 4]", font=MONO, weight=BOLD, font_size=56, color=CONSOLE_GREEN)
         VGroup(prompt, result).arrange(DOWN, aligned_edge=LEFT, buff=0.2).next_to(console[2], DOWN, buff=0.2,
                                                                                   aligned_edge=LEFT)
         ring = Circle(radius=0.5, stroke_color="#FF4D4D", stroke_width=9).move_to(result[-2])

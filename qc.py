@@ -33,6 +33,9 @@ VIDEOS = {
     "aliasing": {"file": "aliasing.py", "scene": "Aliasing"},
     "floating_point": {"file": "floating_point.py", "scene": "FloatingPoint"},
     "hash_map": {"file": "hash_map.py", "scene": "HashMap"},
+    "selection_sort": {"file": "selection_sort.py", "scene": "SelectionSort"},
+    "git_commands": {"file": "git_commands.py", "scene": "GitCommands"},
+    "docker_commands": {"file": "docker_commands.py", "scene": "DockerCommands"},
 }
 
 FORMATS = {

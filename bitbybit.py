@@ -932,6 +932,89 @@ class BitScene(Scene):
             self.add(console.rows)
         self.adopt(console.rows, line)
 
+    def terminal(self, width, height, title="bash", font_size=26):
+        """Terminal window with a title bar; term_type() and term_echo() write into it and scroll it."""
+        body = RoundedRectangle(width=width, height=height, corner_radius=0.18, fill_color="#0E1020", fill_opacity=1,
+                                stroke_color="#3A3F75", stroke_width=2)
+        bar = Line(body.get_corner(UL) + DOWN * 0.44, body.get_corner(UR) + DOWN * 0.44, stroke_color="#3A3F75",
+                   stroke_width=2)
+        lights = VGroup(*[Dot(radius=0.07, color=c) for c in ("#FF5F56", "#FFBD2E", "#27C93F")]).arrange(RIGHT, buff=0.12)
+        lights.move_to(body.get_corner(UL) + np.array([0.42, -0.22, 0]))
+        label = Text(title, font=MONO, font_size=20, color=GRAY_B).move_to(body.get_top() + DOWN * 0.22)
+        term = VGroup(self.shadow(body), body, bar, lights, label)
+        term.rows, term.font_size = [], font_size  # rows: the lines on screen, top to bottom
+        return term
+
+    def _term_row(self, term, k):
+        """Left end of row k of the terminal (rows are spaced by the font size)."""
+        step = 0.42 * term.font_size / 26
+        return term[1].get_corner(UL) + np.array([0.28, -0.44 - 0.12 - step * (k + 0.5), 0]), step
+
+    def _term_room(self, term):
+        """Scroll the terminal up by one row when it is full."""
+        _, step = self._term_row(term, 0)
+        if len(term.rows) >= int((term[1].height - 0.6) / step):
+            first = term.rows.pop(0)
+            self.play(FadeOut(first, shift=UP * step), *[r.animate.shift(UP * step) for r in term.rows], run_time=0.15)
+
+    def term_type(self, term, command, prompt="$"):
+        """Type `command` after the prompt, two characters a frame, with key clicks."""
+        self._term_room(term)
+        line = Text(f"{prompt} {command}", font=MONO, font_size=term.font_size, color=TEXT_LIGHT)
+        n = len(prompt)
+        line[:n].set_color(CONSOLE_GREEN)
+        line.move_to(self._term_row(term, len(term.rows))[0], aligned_edge=LEFT)
+        self.add(line[:n])
+        for k in range(n, len(line), 2):
+            self.sfx("key", gain=-4 if k % 4 else -1)
+            self.play(FadeIn(line[k:k + 2]), run_time=0.06)
+        self.remove(*line)
+        self.add(line)
+        term.rows.append(line)
+        return line
+
+    def term_echo(self, term, text, color=TEXT_MUTED, run_time=0.15):
+        """Print an output line in the terminal."""
+        self._term_room(term)
+        line = Text(text, font=MONO, font_size=term.font_size, color=color)
+        line.move_to(self._term_row(term, len(term.rows))[0], aligned_edge=LEFT)
+        self.play(FadeIn(line, shift=UP * 0.1), run_time=run_time)
+        term.rows.append(line)
+        return line
+
+    def term_clear(self, term):
+        if term.rows:
+            self.play(*[FadeOut(r) for r in term.rows], run_time=0.2)
+        term.rows = []
+
+    def cheat_sheet(self, bit, title, rows, at=RIGHT * 0.7 + DOWN * 0.1):
+        """Recap screen for the long video: every command with a one-line description, to pause and screenshot."""
+        self.chapter("cheat_sheet", "Cheat sheet")
+        self.say(bit, "Here's your cheat sheet.\nPause and screenshot it!", UR)
+        cells = VGroup(*[
+            VGroup(Text(cmd, font=MONO, weight=BOLD, font_size=24, color=ACCENT),
+                   Text(desc, font=FONT, font_size=22, color=TEXT_LIGHT)).arrange(DOWN, aligned_edge=LEFT, buff=0.06)
+            for cmd, desc in rows
+        ]).arrange_in_grid(rows=(len(rows) + 1) // 2, cols=2, buff=(0.9, 0.24), flow_order="dr", cell_alignment=LEFT)
+        head = headline_text(title, 48, HEADLINE)
+        sheet = VGroup(head, cells).arrange(DOWN, buff=0.35)
+        panel = RoundedRectangle(width=sheet.width + 0.8, height=sheet.height + 0.6, corner_radius=0.25,
+                                 fill_color="#20244F", fill_opacity=1, stroke_color="#3A3F75", stroke_width=3)
+        card = VGroup(self.shadow(panel), panel, sheet.move_to(panel))
+        card.scale(min(12.2 / card.width, 6.6 / card.height)).move_to(at)  # as big as the frame allows
+        self.sfx("whoosh")
+        self.play(FadeIn(card[:2], scale=0.95), FadeIn(head), run_time=0.4)
+        for cell in cells:
+            self.sfx("blip", gain=-8)
+            self.play(FadeIn(cell, shift=RIGHT * 0.2), run_time=0.15)
+        self.sfx("ding")
+        self.play(bit.express("grin", "raised"), bit.arms_up(run_time=0.3), run_time=0.3)
+        self.wait(2.5)
+        self.play(bit.arms_rest(run_time=0.3), bit.express("smile", "neutral"), run_time=0.3)
+        self.sfx("whoosh")
+        self.play(*[FadeOut(m) for m in self.top_level()[1:]], run_time=0.5)
+        self.stage()
+
     def joke(self, bit, setup, punch, speech_setup=None, speech_punch=None):
         """Setup line, then the punchline with a rimshot; Bit ends up grinning."""
         self.say(bit, setup, UR, speech=speech_setup)
