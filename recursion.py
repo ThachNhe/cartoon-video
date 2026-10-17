@@ -7,6 +7,9 @@ Render:  .venv/bin/manim -qh --fps 30 recursion.py Recursion
 Preview: .venv/bin/manim -ql recursion.py Recursion
 Set BIT_VOICE=0 to render without narration.
 
+Vertical 9:16 for YouTube Shorts / Facebook Reels (lands in media/videos/recursion/1920p30/):
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 recursion.py Recursion
+
 Channel avatar (2048x2048 PNG; the round one has a transparent outside):
     .venv/bin/manim -s -r 2048,2048 recursion.py ChannelAvatar
     .venv/bin/manim -s -t -r 2048,2048 recursion.py ChannelAvatarRound
@@ -152,6 +155,18 @@ def _load_dotenv(path=ROOT / ".env"):
 _load_dotenv()
 
 VOICE_ENABLED = os.environ.get("BIT_VOICE", "1") != "0"
+
+VERTICAL = os.environ.get("BIT_FORMAT") == "vertical"
+if VERTICAL:
+    # Portrait frame with the same pixels per unit as 16:9, so every mobject keeps its size.
+    if config.pixel_width > config.pixel_height:
+        config.pixel_width, config.pixel_height = config.pixel_height, config.pixel_width
+    config.frame_width, config.frame_height = 8.0, 8.0 * 16 / 9
+
+
+def pick(wide, tall):
+    """The value for the current format: 16:9 or vertical 9:16."""
+    return tall if VERTICAL else wide
 
 
 class Narrator:
@@ -603,8 +618,11 @@ NO_BASE_CASE = """def countdown(n):
     print(n)
     countdown(n - 1)"""
 
-STACK_X = 4.6
-STACK_BASE_Y = -3.3
+CODE_WIDTH = pick(6.2, 7.2)
+CODE_DIR = pick(UL, UP)  # where Bit looks to read the code
+STACK_X = pick(4.6, 1.85)
+STACK_BASE_Y = pick(-3.3, -4.6)
+STACK_TOP_Y = pick(2.9, 0.8)  # past this, new frames push the stack down
 FRAME_STEP = 0.68
 
 
@@ -630,7 +648,9 @@ class Recursion(Scene):
         # A bigger head than the avatar's, so only a thin orange rim shows at this size.
         icon = channel_icon(size=256, height=0.42, head_height=6.8, head_y=-0.14)
         mark = Group(icon, wordmark(size=19, color=WHITE)).arrange(RIGHT, buff=0.12)
-        return flatten(mark, opacity=0.42).to_corner(UR, buff=0.21)
+        mark = flatten(mark, opacity=0.42)
+        # Shorts and Reels draw their own buttons in the corners; the top centre stays clear.
+        return mark.to_edge(UP, buff=1.0) if VERTICAL else mark.to_corner(UR, buff=0.21)
 
     def stage(self):
         """Empty the scene down to the background and the watermark."""
@@ -692,13 +712,14 @@ class Recursion(Scene):
         """Night sky: deep navy, soft planets in the corners, faint stars. Oversized so shakes never show an edge."""
         sky = Rectangle(width=config.frame_width + 2, height=config.frame_height + 2,
                         fill_color=BG, fill_opacity=1, stroke_width=0)
+        hw, hh = config.frame_width / 2, config.frame_height / 2
         planets = VGroup(
-            Circle(radius=3.2, fill_color="#232756", fill_opacity=1, stroke_width=0).move_to([-7.2, 4.2, 0]),
-            Circle(radius=4.0, fill_color="#20244F", fill_opacity=1, stroke_width=0).move_to([7.6, -4.6, 0]),
+            Circle(radius=3.2, fill_color="#232756", fill_opacity=1, stroke_width=0).move_to([-hw - 0.09, hh + 0.2, 0]),
+            Circle(radius=4.0, fill_color="#20244F", fill_opacity=1, stroke_width=0).move_to([hw + 0.49, -hh - 0.6, 0]),
         )
         rng = np.random.default_rng(4)
         stars = VGroup(*[
-            Dot([rng.uniform(-7, 7), rng.uniform(-4, 4), 0], radius=rng.uniform(0.012, 0.03),
+            Dot([rng.uniform(-1, 1) * (hw - 0.11), rng.uniform(-1, 1) * hh, 0], radius=rng.uniform(0.012, 0.03),
                 color=WHITE, fill_opacity=rng.uniform(0.15, 0.4))
             for _ in range(70)
         ])
@@ -708,7 +729,7 @@ class Recursion(Scene):
         """Soft drop shadow to lift panels off the background."""
         return mob.copy().set_fill(BLACK, 0.35).set_stroke(width=0).shift(DR * 0.08)
 
-    def make_code(self, source, width=6.2):
+    def make_code(self, source, width=CODE_WIDTH):
         def build(src):
             return Code(
                 code_string=src, language="python", formatter_style="one-dark",
@@ -764,8 +785,9 @@ class Recursion(Scene):
 
     def intro(self):
         """Bit types the title on a laptop, typos it, and fixes it."""
-        final = Text("RECURSION", font=FONT, weight=BOLD, font_size=120, color=HEADLINE).move_to(UP * 2.0)
-        typo = Text("RECURSOIN", font=FONT, weight=BOLD, font_size=120, color=HEADLINE)
+        size = pick(120, 80)
+        final = Text("RECURSION", font=FONT, weight=BOLD, font_size=size, color=HEADLINE).move_to(UP * pick(2.0, 3.0))
+        typo = Text("RECURSOIN", font=FONT, weight=BOLD, font_size=size, color=HEADLINE)
         typo.align_to(final, LEFT).align_to(final, DOWN)
         bit = Bit().move_to(DOWN * 1.7)
         laptop = self.laptop()
@@ -862,9 +884,14 @@ class Recursion(Scene):
         return bit
 
     def happy_path(self, bit):
-        code = self.make_code(COUNTDOWN).to_corner(UL, buff=0.5).shift(DOWN * 0.35)
+        code = self.make_code(COUNTDOWN)
+        if VERTICAL:
+            # Code across the top; output (left) and call stack (right) share the space below.
+            code.to_edge(UP, buff=1.7).set_x(0)
+        else:
+            code.to_corner(UL, buff=0.5).shift(DOWN * 0.35)
         panel = RoundedRectangle(
-            width=code.width, height=1.95, corner_radius=0.15,
+            width=pick(code.width, 3.4), height=1.95, corner_radius=0.15,
             fill_color="#11111B", fill_opacity=1, stroke_color=GRAY_D, stroke_width=2,
         ).next_to(code, DOWN, buff=0.3, aligned_edge=LEFT)
         panel_label = Text("OUTPUT", font=MONO, font_size=20, color=GRAY_B).next_to(
@@ -874,7 +901,7 @@ class Recursion(Scene):
         base = Line([STACK_X - 1.8, STACK_BASE_Y, 0], [STACK_X + 1.8, STACK_BASE_Y, 0], color=TEXT_MUTED, stroke_width=5)
         code_shadow, panel_shadow = self.shadow(code.background), self.shadow(panel)
 
-        self.play(bit.animate.scale(0.7).move_to([1.4, -2.55, 0]), run_time=0.6)
+        self.play(bit.animate.scale(0.7).move_to(pick([1.4, -2.55, 0], [-2.0, -3.3, 0])), run_time=0.6)
         self.play(
             FadeIn(VGroup(code_shadow, code), shift=RIGHT * 0.5), FadeIn(panel_shadow), FadeIn(VGroup(panel, panel_label)),
             FadeIn(stack_title), Create(base), run_time=0.8,
@@ -901,7 +928,7 @@ class Recursion(Scene):
             self.adopt(stack, frame)
 
         bar = self.line_bar(code, 0)
-        self.play(FadeIn(bar), bit.look(UL), run_time=0.3)
+        self.play(FadeIn(bar), bit.look(CODE_DIR), run_time=0.3)
 
         for n in (3, 2, 1, 0):
             slow = n == 3
@@ -912,7 +939,7 @@ class Recursion(Scene):
                 self.play(bit.look(RIGHT), run_time=0.15)
                 self.say(bit, "Every call gets its own\nbox on the call stack.", UP, shift=RIGHT * 0.4,
                          gesture=bit.point(1, 75))
-                self.play(bit.look(UL), bit.arms_rest(run_time=0.25), run_time=0.25)
+                self.play(bit.look(CODE_DIR), bit.arms_rest(run_time=0.25), run_time=0.25)
             self.bar_to(bar, code, 1, run_time=step)
             if slow:
                 self.say(bit, "Is n == 0? Nope, it's 3.\nKeep going!", UP, shift=RIGHT * 0.4,
@@ -993,18 +1020,19 @@ class Recursion(Scene):
         depth_label = always_redraw(lambda: Text(
             f"depth: {int(depth.get_value())}", font=MONO, font_size=30,
             color=interpolate_color(ManimColor(TEXT_LIGHT), ManimColor(RED), min(1, depth.get_value() / 600)),
-        ).move_to([1.4, 3.35, 0]))
-        self.play(FadeIn(depth_label), bit.express("smile", "neutral"), bit.look(UL), run_time=0.3)
+        ).move_to(pick([1.4, 3.35, 0], [STACK_X, STACK_TOP_Y + 0.6, 0])))
+        self.play(FadeIn(depth_label), bit.express("smile", "neutral"), bit.look(CODE_DIR), run_time=0.3)
 
         bar = self.line_bar(code, 0)
         self.add(bar)
         next_y = STACK_BASE_Y + 0.36
+        offscreen = -config.frame_height / 2 - 0.3  # frames below this have scrolled away
 
         for k, n in enumerate(range(3, -36, -1)):
             run_time = max(0.06, 0.4 * 0.8 ** k)
             frame = self.stack_frame(n, FRAME_COLORS[k % len(FRAME_COLORS)])
             anims = [bar.animate.set_y(code.code_lines[k % 3].get_y())]
-            if next_y > 2.9:
+            if next_y > STACK_TOP_Y:
                 anims.append(stack.animate.shift(DOWN * FRAME_STEP))
                 frame.move_to([STACK_X, next_y - FRAME_STEP, 0])
             else:
@@ -1028,7 +1056,7 @@ class Recursion(Scene):
             self.adopt(output, line)
             frames.append(frame)
             for f in frames:
-                if f.get_top()[1] < -4.3 and f in stack:
+                if f.get_top()[1] < offscreen and f in stack:
                     stack.remove(f)
 
             if n == 0:
@@ -1063,17 +1091,18 @@ class Recursion(Scene):
             )
             self.adopt(stack, frame)
             for f in list(stack):
-                if f is not base and f.get_top()[1] < -4.3:
+                if f is not base and f.get_top()[1] < offscreen:
                     stack.remove(f)
 
         # Crash.
         box = RoundedRectangle(
-            width=11.2, height=2.3, corner_radius=0.2,
+            width=pick(11.2, 7.4), height=pick(2.3, 2.9), corner_radius=0.2,
             fill_color="#B00020", fill_opacity=0.97, stroke_color=WHITE, stroke_width=5,
         )
+        message = pick(["maximum recursion depth exceeded"], ["maximum recursion", "depth exceeded"])
         err = VGroup(
             Text("RecursionError:", font=MONO, weight=BOLD, font_size=52, color=WHITE),
-            Text("maximum recursion depth exceeded", font=MONO, font_size=38, color=WHITE),
+            *[Text(line, font=MONO, font_size=38, color=WHITE) for line in message],
         ).arrange(DOWN, buff=0.25, aligned_edge=LEFT).move_to(box)
         banner = VGroup(box, err).rotate(-3 * DEGREES).move_to(UP * 0.6)
         self.sfx("crash")
@@ -1090,7 +1119,7 @@ class Recursion(Scene):
         self.stage()
 
     def punchline(self):
-        bit = Bit().move_to([-4.6, -0.6, 0])
+        bit = Bit().move_to(pick([-4.6, -0.6, 0], [-1.8, -1.4, 0]))
         bandage = VGroup(*[
             RoundedRectangle(width=0.5, height=0.16, corner_radius=0.06, fill_color="#F5D6A8",
                              fill_opacity=1, stroke_color="#C9A27A", stroke_width=2).rotate(a)
@@ -1116,7 +1145,7 @@ class Recursion(Scene):
                            stroke_color=TEXT_LIGHT, stroke_width=6)
         self.play(Create(border), run_time=0.4)
         world = VGroup(border, bit, bubble)
-        pivot = np.array([4.6, -2.3, 0])
+        pivot = np.array(pick([4.6, -2.3, 0], [2.0, -4.2, 0]))
         ratio = 0.45
         copies = []
         for i in range(1, 6):
@@ -1138,12 +1167,14 @@ class Recursion(Scene):
         self.stage()
 
     def outro(self):
-        headline = Text("Always write your base case.", font=FONT, weight=BOLD, font_size=56, color=HEADLINE).to_edge(UP, buff=0.9)
-        bit = Bit().move_to([-3.6, -1.0, 0])
+        lines = pick(["Always write your base case."], ["Always write", "your base case."])
+        headline = VGroup(*[Text(line, font=FONT, weight=BOLD, font_size=56, color=HEADLINE) for line in lines])
+        headline.arrange(DOWN, buff=0.2).to_edge(UP, buff=pick(0.9, 2.0))
+        bit = Bit().move_to(pick([-3.6, -1.0, 0], [0, -2.2, 0]))
         button = VGroup(RoundedRectangle(width=4.0, height=1.1, corner_radius=0.2, fill_color="#E53935",
                                          fill_opacity=1, stroke_width=0))
         button.add(Text("SUBSCRIBE", font=FONT, weight=BOLD, font_size=40).move_to(button[0]))
-        button.move_to([2.8, -1.0, 0])
+        button.move_to(pick([2.8, -1.0, 0], [0, 2.0, 0]))
 
         self.play(Write(headline), FadeIn(bit, shift=UP * 0.5), run_time=1.0)
         self.play(FadeIn(button, scale=0.8), run_time=0.4)
@@ -1151,7 +1182,7 @@ class Recursion(Scene):
 
         cursor = Polygon([0, 0, 0], [0.0, -0.75, 0], [0.2, -0.56, 0], [0.42, -0.95, 0], [0.55, -0.88, 0],
                          [0.34, -0.5, 0], [0.6, -0.48, 0], fill_color=WHITE, fill_opacity=1,
-                         stroke_color=INK, stroke_width=3).move_to([6.2, -3.4, 0])
+                         stroke_color=INK, stroke_width=3).move_to(pick([6.2, -3.4, 0], [3.2, -4.8, 0]))
         self.play(FadeIn(cursor), bit.look(RIGHT), run_time=0.3)
         self.play(cursor.animate.move_to(button.get_center() + DR * 0.3), run_time=0.7)
         self.sfx("pop")
