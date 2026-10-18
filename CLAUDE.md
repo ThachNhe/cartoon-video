@@ -4,7 +4,8 @@ Kênh **BitByBit** làm video hoạt hình ngắn giải thích khái niệm l�
 
 | Dạng | Tỉ lệ | Nền tảng |
 |---|---|---|
-| Bản đầy đủ | 16:9, 1920×1080 | YouTube (video thường) |
+| Bản đầy đủ | 16:9, 2560×1440 | YouTube (video thường). YouTube nén video từ 1440p trở lên bằng chuẩn tốt hơn, chữ trong code nét hơn |
+| Bản đầy đủ | 16:9, 1920×1080 | Fanpage Facebook (Facebook nén lại nên 1080p là đủ) |
 | Bản ngắn | 9:16, 1080×1920 | YouTube Shorts + Facebook Reels |
 
 Trả lời người dùng bằng **tiếng Việt**. Code, comment và chữ trong video viết bằng **tiếng Anh**.
@@ -26,14 +27,16 @@ assets/fonts/        Poppins (chữ thường), JetBrains Mono NL (code; bản N
 assets/sfx/          Hiệu ứng âm thanh, tự sinh bằng make_sfx() nếu thiếu file
 assets/voice/        Cache giọng đọc đã tạo (được commit, nên render lại không cần chạy TTS)
 assets/voice_ref/    Giọng mẫu: dave.pt (codes đã encode), dave.txt (transcript)
-media/videos/<video>/1080p30/   Bản 16:9
+media/videos/<video>/1440p30/   Bản 16:9 cho YouTube (2560×1440)
+media/videos/<video>/1080p30/   Bản 16:9 cho fanpage Facebook (1920×1080)
 media/videos/<video>/1920p30/   Bản 9:16
 ```
 
 ## Render
 
 ```bash
-.venv/bin/manim -qh --fps 30 <video>.py <Scene>                       # 16:9
+.venv/bin/manim -qh -r 2560,1440 --fps 30 <video>.py <Scene>          # 16:9 cho YouTube (1440p)
+.venv/bin/manim -qh --fps 30 <video>.py <Scene>                       # 16:9 cho fanpage Facebook (1080p)
 BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 <video>.py <Scene>   # 9:16, tự đổi khung hình, không cần -r
 .venv/bin/manim -ql <video>.py <Scene>                                # xem nhanh, chất lượng thấp
 BIT_VOICE=0 ...                                                       # render không có lồng tiếng
@@ -95,7 +98,7 @@ Lặp cho tới khi **ĐẠT**, rồi duyệt ảnh lưới theo checklist bằn
 |---|---|---|
 | Cache manim đã tắt | có `config.disable_caching = True` | sửa code |
 | Có file video, mới hơn code | mtime của mp4 ≥ mtime của file `.py` | render lại |
-| Độ phân giải / fps | 1920×1080 hoặc 1080×1920, 30fps | render lại |
+| Độ phân giải / fps | `wide1440` 2560×1440, `wide` 1920×1080, `vertical` 1080×1920; 30fps | render lại |
 | Độ dài | 16:9 ≤ 600s; 9:16 cảnh báo > 75s, lỗi > 90s | sửa code |
 | Âm thanh đủ tới cuối | dừng trước hình ≤ 5s (bắt lỗi mất tiếng) | render lại |
 | Độ to | -14 ± 1.5 LUFS | render lại |
@@ -242,7 +245,7 @@ Mọi video dưới đây đã qua đủ checklist tự động. Kết quả duy
 | `aliasing.py` → `Aliasing` | `b = a` không copy. Hook: "Why did my list change BY ITSELF?!" | Nhãn tên `a`/`b` trỏ vào cùng một hộp list; sửa bằng `a.copy()` | "= shares, .copy() copies." | a và b chia tay: "They shared EVERYTHING." | "WHO ADDED 4?!" | "Why Did My Python List Change By Itself? (b = a)" |
 | `floating_point.py` → `FloatingPoint` | 0.1 không kết thúc trong hệ nhị phân. Hook: "Why can't Python add 0.1 + 0.2?!" | REPL Python; 1/3 trong thập phân ↔ 0.1 trong nhị phân; `==` → False; sửa bằng `math.isclose` | "Never compare floats with ==." | Ngân hàng dùng float: "$0.30000000000000004" | "0.1 + 0.2 = 0.30000000000000004 WHY?!" | "Why 0.1 + 0.2 Is NOT 0.3 in Python" |
 | `hash_map.py` → `HashMap` | `hash()` % số bucket → tra 1 bước. Hook: "How does Python find a key INSTANTLY?" | Máy `hash()`; 8 bucket; giá trị hash là minh hoạ (`HASHES`); va chạm Bit/Ada cùng bucket 4 | "Fast lookups? Use a dict." | Phòng không phải hash map: "Finding my socks takes O(n)." | "1 STEP. Not a million." | "How Python Dicts Find Any Key in ONE Step (Hash Maps)" |
-| `selection_sort.py` → `SelectionSort` | Tìm nhỏ nhất, đổi lên đầu, lặp lại. Hook: "Find the smallest. Swap. Repeat. That's it?!" | 6 cột [29,10,14,37,13,5], đếm so sánh (15); bản dài giải thích code từng dòng + O(n²); 1 triệu phần tử = 499,999,500,000 so sánh | "Find the smallest. Swap. Repeat." | Số nhỏ nhất tự tin: "It knows it'll be SELECTED first." | "PICK. SWAP. REPEAT." | "Selection Sort Explained Step by Step (with Code)" |
+| `selection_sort.py` → `SelectionSort` | Tìm nhỏ nhất, đổi lên đầu, lặp lại. Hook: "Find the smallest. Swap. Repeat. That's it?!" | 6 cột [29,10,14,37,13,5] chạy **cùng khung code**: thanh highlight theo đúng dòng đang chạy (`goto()`: `for i` → `low = i` → `if a[j] < a[low]` → `low = j` → dòng hoán đổi); đếm so sánh (15; 9:16 đặt ở thanh tiêu đề khung code). Bản dài giải thích code trước khi chạy + O(n²); 1 triệu phần tử = 499,999,500,000 so sánh | "Find the smallest. Swap. Repeat." | Số nhỏ nhất tự tin: "It knows it'll be SELECTED first." | "PICK. SWAP. REPEAT." | "Selection Sort Explained Step by Step (with Code)" |
 | `git_commands.py` → `GitCommands` | 10 lệnh: init, clone, status, add, commit, log, branch, switch, merge, push (+pull ở bản dài). Hook: "Know these 10 git commands? You'll use them DAILY." | Terminal + sơ đồ Working dir → Staging → Repository → GitHub; vòng vàng là HEAD. Bản dài: mẹo mỗi lệnh + cheat sheet; bản ngắn: một câu ngắn mỗi lệnh | "status, add, commit, push. Repeat!" | "Too many COMMITMENT issues." | "10 GIT COMMANDS you'll use EVERY day" | "10 Git Commands You'll Use Every Day (Beginner Friendly)" |
 | `docker_commands.py` → `DockerCommands` | 10 lệnh: pull, images, run, ps, logs, exec, stop, rm, build, compose up. Hook: "It works on MY machine!" | Terminal + Docker Hub → Images → Containers; Bit chui vào container khi `exec`. Bản dài: mẹo + cheat sheet | "Image = recipe. Container = cake." | "Then we'll ship your machine. That's Docker!" | "10 DOCKER COMMANDS" | "10 Docker Commands Every Developer Needs (Image vs Container)" |
 
@@ -288,3 +291,4 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
 - **Khi thay đổi thiết kế** (watermark, bố cục, hiệu ứng): render vài phương án thành ảnh để người dùng chọn, kèm đề xuất của mình.
 - **File cho người dùng xem:** đặt trong project (ví dụ `media/...`), không để trong `/tmp`, và đưa link bấm được.
 - **Commit:** chỉ commit khi người dùng yêu cầu.
+- **Render nhiều video hoặc render lâu** (render lại tất cả, `qc.py --fix` cho nhiều video, bản 1440p): không tự chạy. Đưa lệnh cho người dùng tự chạy khi họ muốn. Render thử `-ql` một video để kiểm tra thay đổi thì vẫn được.

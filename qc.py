@@ -2,7 +2,7 @@
 
     .venv/bin/python qc.py                     # every video, both formats
     .venv/bin/python qc.py recursion           # one video
-    .venv/bin/python qc.py --format vertical   # one format
+    .venv/bin/python qc.py --format vertical   # one format: wide (1080p, Facebook), wide1440 (YouTube), vertical
     .venv/bin/python qc.py --fix               # re-render missing/stale/broken outputs, then check again
 
 Exits with 1 while any check fails. Reports and contact sheets (for the visual checklist in
@@ -73,6 +73,10 @@ FORMATS = {
         "cta_tail": (10, 15),
     },
 }
+
+# YouTube gives uploads of 1440p and up a better encoder, so the YouTube cut is rendered at 1440p.
+# The 1080p "wide" cut is the one for the Facebook page.
+FORMATS["wide1440"] = {**FORMATS["wide"], "size": (2560, 1440), "folder": "1440p30", "args": ["-r", "2560,1440"]}
 
 WPM = (120, 200)              # narration speed, words per minute
 SPEECH_SHARE = (0.3, 0.85)    # share of the runtime with narration
@@ -362,7 +366,8 @@ def render(name, fmt):
     video_cfg, spec = VIDEOS[name], FORMATS[fmt]
     log = QC_DIR / name / f"{fmt}_render.log"
     log.parent.mkdir(parents=True, exist_ok=True)
-    cmd = [str(ROOT / ".venv" / "bin" / "manim"), "-qh", "--fps", str(FPS), video_cfg["file"], video_cfg["scene"]]
+    cmd = [str(ROOT / ".venv" / "bin" / "manim"), "-qh", *spec.get("args", []), "--fps", str(FPS),
+           video_cfg["file"], video_cfg["scene"]]
     print(f"  ... đang render: {' '.join(f'{k}={v}' for k, v in spec['env'].items())} {' '.join(cmd[1:])}", flush=True)
     with log.open("w") as f:
         done = subprocess.run(cmd, cwd=ROOT, env={**os.environ, **spec["env"]}, stdout=f, stderr=subprocess.STDOUT)
@@ -388,7 +393,7 @@ def show(name, fmt, movie, rep):
 def main():
     parser = argparse.ArgumentParser(description="Kiểm tra chất lượng video đã render.")
     parser.add_argument("videos", nargs="*", help=f"mặc định: tất cả ({', '.join(VIDEOS)})")
-    parser.add_argument("--format", choices=FORMATS, help="mặc định: cả hai tỉ lệ")
+    parser.add_argument("--format", choices=FORMATS, help="mặc định: cả ba bản (wide, wide1440, vertical)")
     parser.add_argument("--fix", action="store_true", help="render lại khi lỗi có thể sửa bằng render")
     args = parser.parse_args()
     unknown = set(args.videos) - set(VIDEOS)

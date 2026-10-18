@@ -21,14 +21,14 @@ CODE = """def selection_sort(a):
         a[i], a[low] = a[low], a[i]"""
 SORTED_GREEN = "#43A047"
 
-BAR_W, BAR_GAP, BAR_UNIT = 0.8, pick(0.25, 0.3), 0.09  # BAR_UNIT: height per value
-BARS_X, BARS_BASE = pick(3.75, 0.0), pick(-1.7, -0.7)
+BAR_W, BAR_GAP, BAR_UNIT = 0.8, pick(0.25, 0.3), pick(0.09, 0.07)  # BAR_UNIT: height per value
+BARS_X, BARS_BASE = pick(3.75, 0.0), pick(-1.7, -1.4)  # 9:16: below the code
 COUNTER_AT = pick([3.75, 2.6, 0], [0, 3.5, 0])
-BIT_AT = pick([-4.6, -2.6, 0], [-2.4, -4.7, 0])
+BIT_AT = pick([-4.6, -2.6, 0], [-2.4, -5.0, 0])
 
 
 class SelectionSort(BitScene):
-    code_width = 7.0
+    code_width = pick(7.0, 7.6)
 
     # ---------------------------------------------------------------- pieces
     def line(self, bit, text, **kwargs):
@@ -56,7 +56,11 @@ class SelectionSort(BitScene):
                      buff=0, stroke_width=7, max_tip_length_to_length_ratio=0.35)
 
     def counter(self, n):
-        return Text(f"comparisons: {n}", font=MONO, weight=BOLD, font_size=30, color=TEXT_LIGHT).move_to(COUNTER_AT)
+        text = Text(f"comparisons: {n}", font=MONO, weight=BOLD, font_size=pick(30, 22), color=TEXT_LIGHT)
+        if not VERTICAL:
+            return text.move_to(COUNTER_AT)
+        # 9:16 has no room beside the bars: use the right end of the code window's title bar.
+        return text.move_to(self.code.background.get_corner(UR) + np.array([-0.25, -0.24, 0]), aligned_edge=RIGHT)
 
     def swap(self, bars, i, j):
         """Swap the bars at positions i and j along arcs; returns the new list."""
@@ -92,11 +96,11 @@ class SelectionSort(BitScene):
         bit, title = self.sorted_title()
         self.chapter("idea", "The idea: pick the smallest")
         bit, bars = self.idea(bit, title)
-        self.chapter("passes", "Step by step")
-        bars = self.passes(bit, bars)
         if not SHORT:
             self.chapter("code", "The code, line by line")
             self.code_walk(bit)
+        self.chapter("passes", "Step by step, code and bars together")
+        bars = self.passes(bit, bars)
         self.chapter("cost", "How fast is it? O(n²)")
         self.cost(bit, bars)
         self.chapter("joke", "The selection sort joke")
@@ -166,24 +170,39 @@ class SelectionSort(BitScene):
         self.sfx("pop")
         self.play(LaggedStart(*[GrowFromEdge(b, DOWN) for b in bars], lag_ratio=0.12), run_time=0.8)
         self.line(bit, "The idea: find the SMALLEST,\nput it first. Then repeat.")
+        # The code stays on screen while the bars run, its highlight on the line being executed.
+        code = self.make_code(CODE)
+        if VERTICAL:
+            code.to_edge(UP, buff=1.7).set_x(0)
+        else:
+            code.to_corner(UL, buff=0.5).shift(DOWN * 0.35)
+        self.code, self.code_panel = code, VGroup(self.shadow(code.background), code)
+        self.sfx("whoosh", gain=-4)
+        self.play(FadeIn(self.code_panel, shift=RIGHT * 0.5), run_time=0.5)
         return bit, bars
+
+    def goto(self, line, *anims, run_time=0.2):
+        """Move the code highlight to `line` while `anims` play: the code runs in step with the bars."""
+        self.play(self.cbar.animate.set_y(self.code.code_lines[line].get_y()), *anims, run_time=run_time)
 
     def scan(self, bars, i, count, narrate):
         """One pass: scan positions i.. for the smallest bar; returns (its position, new count)."""
         low, values = i, self.values
-        self.play(self.paint(bars[i], ACCENT), run_time=0.2)
+        self.goto(1, run_time=0.15)                                     # for i in range(len(a)):
+        self.goto(2, self.paint(bars[i], ACCENT))                       #     low = i
         arrow = self.scan_arrow(i)
         self.play(GrowArrow(arrow), run_time=0.15)
         if narrate:
             self.line(self.bit, f"{values[i]} is the smallest...\nso far.", speech=f"{values[i]} is the smallest. So far.")
+        self.goto(3, run_time=0.15)                                     #     for j in range(i + 1, len(a)):
         for j in range(i + 1, len(bars)):
             count += 1
             self.sfx("blip", gain=-6)
-            self.play(arrow.animate.become(self.scan_arrow(j)), self.counter_text.animate.become(self.counter(count)),
-                      run_time=0.2 if narrate else 0.14)
+            self.goto(4, arrow.animate.become(self.scan_arrow(j)),       #         if a[j] < a[low]:
+                      self.counter_text.animate.become(self.counter(count)), run_time=0.22 if narrate else 0.15)
             if values[j] < values[low]:
                 self.sfx("pop")
-                self.play(self.paint(bars[low], "#5C6BC0"), self.paint(bars[j], ACCENT), run_time=0.2)
+                self.goto(5, self.paint(bars[low], "#5C6BC0"), self.paint(bars[j], ACCENT))  # low = j
                 if narrate and low == i:  # explain the rule once
                     self.line(self.bit, f"{values[j]} is smaller!\nNew smallest.", speech=f"{values[j]} is smaller! New smallest.")
                 low = j
@@ -194,7 +213,8 @@ class SelectionSort(BitScene):
         self.values = list(VALUES)
         self.bit = bit
         self.counter_text = self.counter(0)
-        self.play(FadeIn(self.counter_text), run_time=0.2)
+        self.cbar = self.line_bar(self.code, 1)
+        self.play(FadeIn(self.counter_text), FadeIn(self.cbar), run_time=0.2)
         count = 0
         for i in range(len(bars) - 1):
             narrate = i == 0 and not SHORT
@@ -208,6 +228,7 @@ class SelectionSort(BitScene):
                           speech="Five is the smallest of all. Swap it to the front!")
             if low == i and i == 1 and not SHORT:
                 self.line(bit, "10 is already in place.\nNo swap needed!", speech="Ten is already in place. No swap needed!")
+            self.goto(6)                                                #     a[i], a[low] = a[low], a[i]
             bars = self.swap(bars, i, low)
             self.values[i], self.values[low] = self.values[low], self.values[i]
             if i == 0:
@@ -224,10 +245,8 @@ class SelectionSort(BitScene):
         return bars
 
     def code_walk(self, bit):
-        code = self.make_code(CODE).to_corner(UL, buff=0.5).shift(DOWN * 0.35)
-        panel = VGroup(self.shadow(code.background), code)
-        self.sfx("whoosh", gain=-4)
-        self.play(FadeIn(panel, shift=RIGHT * 0.5), run_time=0.5)
+        """16:9: what each part of the code does, before it runs."""
+        code = self.code
         self.moment("twist")
         bar = self.line_bar(code, 1)
         self.play(FadeIn(bar), run_time=0.2)
@@ -239,12 +258,13 @@ class SelectionSort(BitScene):
         self.play(bar.animate.stretch_to_fit_height(self.line_bar(code, 6).height).set_y(code.code_lines[6].get_y()),
                   run_time=0.3)
         self.line(bit, "Then ONE swap. Python swaps\ntwo values in a single line!")
-        self.sfx("whoosh")
-        self.play(FadeOut(panel), FadeOut(bar), run_time=0.4)
+        self.play(FadeOut(bar), run_time=0.2)
+        self.line(bit, "Now watch the code run.\nThe highlight follows along!")
 
     def cost(self, bit, bars):
         self.sfx("whoosh")
-        self.play(*[FadeOut(b) for b in bars], FadeOut(self.counter_text), run_time=0.4)
+        self.play(*[FadeOut(b) for b in bars], FadeOut(self.counter_text), FadeOut(self.code_panel), FadeOut(self.cbar),
+                  run_time=0.4)
         rows = [("6 items", "15"), ("1,000 items", "499,500"), ("1,000,000 items", "499,999,500,000")]
         table = VGroup(*[
             VGroup(Text(n, font=FONT, weight=BOLD, font_size=34, color=TEXT_LIGHT),
