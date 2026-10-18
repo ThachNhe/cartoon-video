@@ -208,10 +208,13 @@ class Thumbnail(ThumbnailMixin, OffByOne):
     def design(self):
         """ONE STEP TOO FAR: the fruit stones, the missing index and Bit falling into the gap."""
         boxes, indexes, ghost = self.platform()
-        row = VGroup(boxes, indexes, ghost).scale(1.25).move_to([2.3, -2.2, 0])
-        bit = self.shocked_bit(1.1).rotate(-0.4).move_to([ghost.get_x() + 0.2, ghost.get_y() + 1.5, 0])
+        row = VGroup(boxes, indexes, ghost).scale(pick(1.25, 1.2)).move_to(pick([2.3, -2.2, 0], [-0.35, -1.4, 0]))
+        bit = self.shocked_bit(1.1).rotate(-0.4).move_to([ghost.get_x() + pick(0.2, -0.2), ghost.get_y() + 1.5, 0])
         words = VGroup(headline_text("ONE STEP", 150, ACCENT), headline_text("TOO FAR!", 150, "#FF4D4D"))
-        words.arrange(DOWN, aligned_edge=LEFT, buff=0.1).to_corner(UL, buff=0.55)
+        if VERTICAL:  # Reels/Shorts cover: centered, clear of the cropped top and bottom
+            words.arrange(DOWN, buff=0.1).scale_to_fit_width(7.2).move_to(UP * 4.4)
+        else:
+            words.arrange(DOWN, aligned_edge=LEFT, buff=0.1).to_corner(UL, buff=0.55)
         err = Text("IndexError", font=MONO, weight=BOLD, font_size=60, color="#FF6B6B")
-        err.set_stroke(INK, 8, background=True).next_to(words, DOWN, buff=0.4, aligned_edge=LEFT)
+        err.set_stroke(INK, 8, background=True).next_to(words, DOWN, buff=0.4, aligned_edge=pick(LEFT, ORIGIN))
         self.add(row, bit, words, err)

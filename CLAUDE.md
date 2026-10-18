@@ -24,6 +24,7 @@ bitbybit.py          Thư viện dùng chung: Bit, thương hiệu, narrator, SF
                      BitScene (lớp cơ sở của mọi video) và ThumbnailMixin
 <video>.py           Mỗi video: `from bitbybit import *` + các cảnh riêng của nó (+ class Thumbnail)
 qc.py                Kiểm tra chất lượng video đã render, tự render lại khi cần (xem mục Kiểm tra chất lượng)
+caption.md           Caption đăng bài của từng video (YouTube, Shorts/Reels)
 channel_art.py       Ảnh bìa fanpage Facebook (1640×856, 3 phương án); bản đã xuất ở media/channel_art/
 assets/fonts/        Poppins (chữ thường), JetBrains Mono NL (code; bản NL không có ligature, manim cần vậy)
 assets/sfx/          Hiệu ứng âm thanh, tự sinh bằng make_sfx() nếu thiếu file
@@ -43,9 +44,10 @@ BIT_VOICE=0 ...                                                       # render k
 .venv/bin/manim -s -r 2048,2048 recursion.py ChannelAvatar            # avatar kênh (vuông)
 .venv/bin/manim -s -t -r 2048,2048 recursion.py ChannelAvatarRound    # avatar tròn, nền trong suốt
 .venv/bin/manim -s -r 1280,720 recursion.py Thumbnail                 # thumbnail YouTube (1280×720)
+BIT_FORMAT=vertical .venv/bin/manim -s -r 1080,1920 -o Thumbnail_vertical recursion.py Thumbnail   # ảnh bìa Shorts + Reels (1080×1920)
 ```
 
-Ảnh tĩnh nằm ở `media/images/<video>/`. Thumbnail đã chọn được chép sang `media/thumbnails/`.
+Ảnh tĩnh nằm ở `media/images/<video>/`. Thumbnail đã chọn được chép sang `media/thumbnails/`; ảnh bìa dọc ở `media/thumbnails/vertical/<video>.png` (`_all.png` là ảnh lưới để duyệt cả loạt). Bố cục dọc nằm ngay trong `design()` của class `Thumbnail` (qua `pick()` / `VERTICAL`): chữ và hình chính ở giữa khung, chừa khoảng 1/4 phía dưới vì lưới trang cá nhân cắt bớt trên dưới và ô Shorts đè tiêu đề lên phần dưới. Recursion mới có bản dọc cho phương án A (`Thumbnail`).
 
 Render chất lượng cao mất vài phút, nên chạy ở chế độ nền.
 
@@ -285,6 +287,7 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
 6. Duyệt kịch bản theo checklist độ thu hút (phần duyệt nội dung) trước khi render bản chính.
 7. Đăng ký video trong `VIDEOS` của `qc.py`, chạy `qc.py --fix` tới khi ĐẠT, rồi duyệt ảnh lưới.
 8. Thêm một mục mới vào phần **Cấu hình từng video** ở trên, kèm kết quả duyệt nội dung và bảng số liệu sau khi đăng.
+9. Thêm caption của video vào `caption.md`.
 
 ## Cách làm việc với người dùng
 

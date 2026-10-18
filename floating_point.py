@@ -165,11 +165,17 @@ class FloatingPoint(BitScene):
 class Thumbnail(ThumbnailMixin, FloatingPoint):
     def design(self):
         """0.1 + 0.2 = 0.30000000000000004 with the junk digits in red and a shocked Bit."""
-        sum_ = headline_text("0.1 + 0.2 =", 120, TEXT_LIGHT).to_corner(UL, buff=0.6).shift(DOWN * 0.2)
+        sum_ = headline_text("0.1 + 0.2 =", 120, TEXT_LIGHT)
+        if VERTICAL:  # Reels/Shorts cover: centered, clear of the cropped top and bottom
+            sum_.scale_to_fit_width(7.0).move_to(UP * 4.9)
+        else:
+            sum_.to_corner(UL, buff=0.6).shift(DOWN * 0.2)
         answer = Text(WEIRD, font=MONO, weight=BOLD, font_size=88, color=ACCENT)
         answer[3:].set_color("#FF4D4D")
-        answer.set_stroke(INK, 12, background=True).scale_to_fit_width(config.frame_width - 1.2)
-        answer.next_to(sum_, DOWN, buff=0.35, aligned_edge=LEFT)
-        bit = self.shocked_bit(1.35).move_to([4.7, -2.0, 0])
-        tag = headline_text("WHY?!", 120, "#FF4D4D").move_to([-2.8, -2.4, 0])
+        answer.set_stroke(INK, 12, background=True).scale_to_fit_width(config.frame_width - pick(1.2, 0.8))
+        answer.next_to(sum_, DOWN, buff=0.35, aligned_edge=pick(LEFT, ORIGIN))
+        bit = self.shocked_bit(1.35).move_to(pick([4.7, -2.0, 0], [0, -2.8, 0]))
+        tag = headline_text("WHY?!", 120, "#FF4D4D").move_to(pick([-2.8, -2.4, 0], [0, 1.2, 0]))
+        if VERTICAL:
+            tag.scale_to_fit_width(6.4)
         self.add(sum_, answer, bit, tag)

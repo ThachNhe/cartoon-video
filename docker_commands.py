@@ -362,11 +362,17 @@ class Thumbnail(ThumbnailMixin, DockerCommands):
         stack = VGroup()
         for row, xs in enumerate(([-1.0, 1.0, 3.0], [0.0, 2.0], [1.0])):
             for x in xs:
-                stack.add(self.container("box", "box")[:3].scale(1.15).move_to([x + 2.6, -2.9 + row * 1.2, 0]))
+                stack.add(self.container("box", "box")[:3].scale(1.15)
+                          .move_to([x + pick(2.6, -1.0), pick(-2.9, -3.3) + row * 1.2, 0]))
         words = VGroup(headline_text("10 DOCKER", 110, DOCKER_BLUE), headline_text("COMMANDS", 96, TEXT_LIGHT))
-        words.arrange(DOWN, aligned_edge=LEFT, buff=0.05).to_corner(UL, buff=0.5)
-        sub = headline_text("image = recipe, container = cake", 40, HEADLINE).next_to(words, DOWN, buff=0.25,
-                                                                                      aligned_edge=LEFT)
+        if VERTICAL:  # Reels/Shorts cover: centered, clear of the cropped top and bottom
+            words.arrange(DOWN, buff=0.05).scale_to_fit_width(7.2).move_to(UP * 4.6)
+        else:
+            words.arrange(DOWN, aligned_edge=LEFT, buff=0.05).to_corner(UL, buff=0.5)
+        sub = headline_text("image = recipe, container = cake", 40, HEADLINE)
+        if VERTICAL:
+            sub.scale_to_fit_width(7.2)
+        sub.next_to(words, DOWN, buff=0.25, aligned_edge=pick(LEFT, ORIGIN))
         bit = Bit().scale(1.0).next_to(stack, UP, buff=-0.05).shift(RIGHT * 0.0)
         bit.mouth.become(bit.make_mouth("grin"))
         bit.brows.become(bit.make_brows("raised"))

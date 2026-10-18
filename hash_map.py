@@ -232,14 +232,17 @@ class Thumbnail(ThumbnailMixin, HashMap):
     def design(self):
         """1 STEP: the hash machine sending a key straight into its bucket."""
         words = VGroup(headline_text("1 STEP.", 160, ACCENT), headline_text("Not a million.", 80, TEXT_LIGHT))
-        words.arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.55)
+        if VERTICAL:  # Reels/Shorts cover: centered, clear of the cropped top and bottom
+            words.arrange(DOWN, buff=0.15).move_to(UP * 4.5)
+        else:
+            words.arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.55)
         slots = VGroup(*[RoundedRectangle(width=0.95, height=0.7, corner_radius=0.1, fill_color="#232756", fill_opacity=1,
                                           stroke_color="#4A50A0", stroke_width=4) for _ in range(BUCKETS)])
-        slots.arrange(RIGHT, buff=0.15).move_to([-1.6, -2.7, 0])
-        key = self.card("Bit", ACCENT).scale(1.5).move_to([1.6, -0.6, 0])
+        slots.arrange(RIGHT, buff=0.15).scale(pick(1, 0.82)).move_to(pick([-1.6, -2.7, 0], [0, 0.4, 0]))
+        key = self.card("Bit", ACCENT).scale(1.5).move_to(pick([1.6, -0.6, 0], [0.9, 2.3, 0]))
         arrow = Arrow(key.get_bottom(), slots[4].get_top(), color=ACCENT, stroke_width=12, buff=0.1)
         slots[4].set_stroke(ACCENT, 6)
-        bit = Bit().scale(1.5).move_to([5.0, -1.2, 0])
+        bit = Bit().scale(1.5).move_to(pick([5.0, -1.2, 0], [0, -2.6, 0]))
         bit.mouth.become(bit.make_mouth("grin"))
         bit.brows.become(bit.make_brows("raised"))
         bit.pose_arms(150, 150)

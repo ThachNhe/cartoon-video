@@ -520,13 +520,17 @@ class Thumbnail(ThumbnailMixin, Recursion):
     def design(self):
         """1 LINE = CRASH: the struck-out base case, the error, and a panicking Bit."""
         for radius, opacity in ((4.2, 0.10), (3.0, 0.12), (1.9, 0.14)):
-            self.add(Circle(radius=radius, fill_color=RED, fill_opacity=opacity, stroke_width=0).move_to([3.6, -0.6, 0]))
-        self.add(self.crash_banner().scale(0.5).rotate(10 * DEGREES).move_to([3.3, 2.6, 0]))
-        self.add(self.shocked_bit(1.75).move_to([3.7, -1.3, 0]))
+            self.add(Circle(radius=radius, fill_color=RED, fill_opacity=opacity, stroke_width=0)
+                     .move_to(pick([3.6, -0.6, 0], [0, -2.2, 0])))
+        self.add(self.crash_banner().scale(0.5).rotate(10 * DEGREES).move_to(pick([3.3, 2.6, 0], [0.3, 0.0, 0])))
+        self.add(self.shocked_bit(1.75).move_to(pick([3.7, -1.3, 0], [0, -3.1, 0])))
         words = VGroup(headline_text("1 LINE", 170, ACCENT), headline_text("= CRASH", 150, "#FF4D4D"))
-        words.arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.6).shift(DOWN * 0.4)
+        if VERTICAL:  # Reels/Shorts cover: centered, clear of the cropped top and bottom
+            words.arrange(DOWN, buff=0.15).scale_to_fit_width(7.2).move_to(UP * 4.6)
+        else:
+            words.arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.6).shift(DOWN * 0.4)
         line = Text("if n == 0:", font=MONO, weight=BOLD, font_size=64, color=TEXT_LIGHT)
-        line.next_to(words, DOWN, buff=0.55, aligned_edge=LEFT).shift(RIGHT * 0.1)
+        line.next_to(words, DOWN, buff=0.55, aligned_edge=pick(LEFT, ORIGIN)).shift(pick(RIGHT * 0.1, ORIGIN))
         strike = Line(line.get_left() + LEFT * 0.15, line.get_right() + RIGHT * 0.15, stroke_color=RED, stroke_width=14)
         self.add(words, line, strike)
 

@@ -226,10 +226,13 @@ class Thumbnail(ThumbnailMixin, BinarySearch):
                                    fill_color=ACCENT if k == 5 else "#4A50A0", fill_opacity=1)
             steps.add(bar)
             width /= 2
-        steps.arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to([-3.0, -1.9, 0])
+        steps.arrange(DOWN, buff=0.14, aligned_edge=LEFT).move_to(pick([-3.0, -1.9, 0], [0, 1.0, 0]))
         words = VGroup(headline_text("1,000,000", 130, ACCENT), headline_text("in 20 GUESSES", 96, TEXT_LIGHT))
-        words.arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.55)
-        bit = Bit().scale(1.7).move_to([4.2, -1.0, 0])
+        if VERTICAL:  # Reels/Shorts cover: centered, clear of the cropped top and bottom
+            words.arrange(DOWN, buff=0.15).scale_to_fit_width(7.2).move_to(UP * 4.4)
+        else:
+            words.arrange(DOWN, aligned_edge=LEFT, buff=0.15).to_corner(UL, buff=0.55)
+        bit = Bit().scale(1.7).move_to(pick([4.2, -1.0, 0], [0, -2.6, 0]))
         bit.mouth.become(bit.make_mouth("grin"))
         bit.brows.become(bit.make_brows("raised"))
         bit.pose_arms(150, 150)

@@ -309,13 +309,16 @@ class Thumbnail(ThumbnailMixin, SelectionSort):
         for k, v in enumerate(values):
             rect = RoundedRectangle(width=0.95, height=v * 0.11, corner_radius=0.1, stroke_color=INK, stroke_width=4,
                                     fill_opacity=1, fill_color=SORTED_GREEN if k < 2 else (ACCENT if v == 13 else "#5C6BC0"))
-            bars.add(rect.move_to([0.0 + k * 1.15, -3.2, 0], aligned_edge=DOWN))
+            bars.add(rect.move_to([pick(0.0, -2.875) + k * 1.15, pick(-3.2, -3.0), 0], aligned_edge=DOWN))
         arc = CurvedArrow(bars[4].get_top() + UP * 0.2, bars[2].get_top() + UP * 0.2, angle=PI / 2.5, color=ACCENT,
                           stroke_width=12)
         words = VGroup(headline_text("PICK.", 130, ACCENT), headline_text("SWAP.", 130, TEXT_LIGHT),
-                       headline_text("REPEAT.", 130, HEADLINE)).arrange(DOWN, aligned_edge=LEFT, buff=0.05)
-        words.to_corner(UL, buff=0.5)
-        bit = Bit().scale(0.9).move_to([5.6, 2.3, 0])
+                       headline_text("REPEAT.", 130, HEADLINE))
+        if VERTICAL:  # Reels/Shorts cover: centered, clear of the cropped top and bottom
+            words.arrange(DOWN, buff=0.05).scale(0.85).move_to(UP * 4.3)
+        else:
+            words.arrange(DOWN, aligned_edge=LEFT, buff=0.05).to_corner(UL, buff=0.5)
+        bit = Bit().scale(0.9).move_to(pick([5.6, 2.3, 0], [0, -4.6, 0]))
         bit.mouth.become(bit.make_mouth("grin"))
         bit.brows.become(bit.make_brows("smug"))
         self.add(bars, arc, words, bit)

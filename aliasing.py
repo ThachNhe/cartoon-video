@@ -202,11 +202,16 @@ class Aliasing(BitScene):
 class Thumbnail(ThumbnailMixin, Aliasing):
     def design(self):
         """TWO NAMES, ONE LIST: both tags pointing at one box that grew a surprise 4."""
-        tag_a = self.name_tag("a", TAG_A, 0).scale(1.6).move_to([-1.0, 0.7, 0])
-        tag_b = self.name_tag("b", TAG_B, 0).scale(1.6).move_to([-1.0, -1.9, 0])
-        box = VGroup(*[self.cell(v) for v in (1, 2, 3, 4)]).arrange(RIGHT, buff=0).scale(1.5).move_to([3.9, -0.6, 0])
+        tag_a = self.name_tag("a", TAG_A, 0).scale(1.6).move_to(pick([-1.0, 0.7, 0], [-2.8, 2.1, 0]))
+        tag_b = self.name_tag("b", TAG_B, 0).scale(1.6).move_to(pick([-1.0, -1.9, 0], [-2.8, -0.5, 0]))
+        box = VGroup(*[self.cell(v) for v in (1, 2, 3, 4)]).arrange(RIGHT, buff=0).scale(1.5)
+        box.move_to(pick([3.9, -0.6, 0], [1.3, 0.8, 0]))
         box[3][0].set_fill("#B00020")
         arrows = VGroup(self.link(tag_a, box, TAG_A), self.link(tag_b, box, TAG_B)).set_stroke(width=12)
-        words = headline_text("WHO ADDED 4?!", 120, ACCENT).to_edge(UP, buff=0.5)
-        bit = self.shocked_bit(1.35).move_to([-4.9, -1.5, 0])
+        if VERTICAL:  # Reels/Shorts cover: two lines, centered
+            words = VGroup(headline_text("WHO ADDED", 110, ACCENT), headline_text("4?!", 170, "#FF4D4D"))
+            words.arrange(DOWN, buff=0.1).scale_to_fit_width(7.0).move_to(UP * 4.6)
+        else:
+            words = headline_text("WHO ADDED 4?!", 120, ACCENT).to_edge(UP, buff=0.5)
+        bit = self.shocked_bit(1.35).move_to(pick([-4.9, -1.5, 0], [0, -3.0, 0]))
         self.add(arrows, tag_a, tag_b, box, words, bit)

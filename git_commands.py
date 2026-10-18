@@ -354,19 +354,24 @@ class GitCommands(BitScene):
 class Thumbnail(ThumbnailMixin, GitCommands):
     def design(self):
         """10 GIT COMMANDS: a branch-and-merge graph and a confident Bit."""
-        xs, y = [-5.6, -4.3, -3.0, -0.4, 0.9], -2.6
+        dx, y = pick((0, -2.6), (2.35, 0.2))  # 9:16: the graph centered under the title
+        xs = [x + dx for x in (-5.6, -4.3, -3.0, -0.4, 0.9)]
         main = [Circle(radius=0.32, fill_color=ACCENT, fill_opacity=1, stroke_color=INK, stroke_width=5).move_to([x, y, 0])
                 for x in xs]
         side = [Circle(radius=0.32, fill_color=FEATURE_COLOR, fill_opacity=1, stroke_color=INK, stroke_width=5)
-                .move_to([x, y + 1.2, 0]) for x in (-1.9,)]
+                .move_to([x + dx, y + 1.2, 0]) for x in (-1.9,)]
         edges = VGroup(*[Line(a.get_center(), b.get_center(), buff=0.32, stroke_width=9, stroke_color=MAIN_COLOR)
                          for a, b in zip(main, main[1:])],
                        Line(main[2].get_center(), side[0].get_center(), buff=0.32, stroke_width=9, stroke_color=FEATURE_COLOR),
                        Line(side[0].get_center(), main[3].get_center(), buff=0.32, stroke_width=9, stroke_color=FEATURE_COLOR))
         words = VGroup(headline_text("10 GIT", 150, ACCENT), headline_text("COMMANDS", 110, TEXT_LIGHT))
-        words.arrange(DOWN, aligned_edge=LEFT, buff=0.05).to_corner(UL, buff=0.5)
-        sub = headline_text("you'll use EVERY day", 54, HEADLINE).next_to(words, DOWN, buff=0.25, aligned_edge=LEFT)
-        bit = Bit().scale(1.5).move_to([4.6, -1.0, 0])
+        if VERTICAL:  # Reels/Shorts cover: centered, clear of the cropped top and bottom
+            words.arrange(DOWN, buff=0.05).scale_to_fit_width(7.2).move_to(UP * 4.8)
+        else:
+            words.arrange(DOWN, aligned_edge=LEFT, buff=0.05).to_corner(UL, buff=0.5)
+        sub = headline_text("you'll use EVERY day", 54, HEADLINE)
+        sub.next_to(words, DOWN, buff=0.25, aligned_edge=pick(LEFT, ORIGIN))
+        bit = Bit().scale(1.5).move_to(pick([4.6, -1.0, 0], [0, -2.7, 0]))
         bit.mouth.become(bit.make_mouth("grin"))
         bit.brows.become(bit.make_brows("smug"))
         bit.pose_arms(150, Bit.REST)
