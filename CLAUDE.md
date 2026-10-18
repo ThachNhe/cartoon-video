@@ -5,8 +5,9 @@ Kênh **BitByBit** làm video hoạt hình ngắn giải thích khái niệm l�
 | Dạng | Tỉ lệ | Nền tảng |
 |---|---|---|
 | Bản đầy đủ | 16:9, 2560×1440 | YouTube (video thường). YouTube nén video từ 1440p trở lên bằng chuẩn tốt hơn, chữ trong code nét hơn |
-| Bản đầy đủ | 16:9, 1920×1080 | Fanpage Facebook (Facebook nén lại nên 1080p là đủ) |
-| Bản ngắn | 9:16, 1080×1920 | YouTube Shorts + Facebook Reels |
+| Bản ngắn | 9:16, 1440×2560 | YouTube Shorts + Facebook Reels: một file dùng cho cả hai (YouTube nén Shorts 1440p tốt hơn; Facebook tự thu về 1080×1920) |
+
+Fanpage Facebook chỉ đăng Reels (bản 9:16). Không làm bản 16:9 1080p cho Facebook nữa (bỏ từ 2026-10-18).
 
 Trả lời người dùng bằng **tiếng Việt**. Code, comment và chữ trong video viết bằng **tiếng Anh**.
 
@@ -23,21 +24,20 @@ bitbybit.py          Thư viện dùng chung: Bit, thương hiệu, narrator, SF
                      BitScene (lớp cơ sở của mọi video) và ThumbnailMixin
 <video>.py           Mỗi video: `from bitbybit import *` + các cảnh riêng của nó (+ class Thumbnail)
 qc.py                Kiểm tra chất lượng video đã render, tự render lại khi cần (xem mục Kiểm tra chất lượng)
+channel_art.py       Ảnh bìa fanpage Facebook (1640×856, 3 phương án); bản đã xuất ở media/channel_art/
 assets/fonts/        Poppins (chữ thường), JetBrains Mono NL (code; bản NL không có ligature, manim cần vậy)
 assets/sfx/          Hiệu ứng âm thanh, tự sinh bằng make_sfx() nếu thiếu file
 assets/voice/        Cache giọng đọc đã tạo (được commit, nên render lại không cần chạy TTS)
 assets/voice_ref/    Giọng mẫu: dave.pt (codes đã encode), dave.txt (transcript)
 media/videos/<video>/1440p30/   Bản 16:9 cho YouTube (2560×1440)
-media/videos/<video>/1080p30/   Bản 16:9 cho fanpage Facebook (1920×1080)
-media/videos/<video>/1920p30/   Bản 9:16
+media/videos/<video>/2560p30/   Bản 9:16 cho Shorts + Reels (1440×2560)
 ```
 
 ## Render
 
 ```bash
 .venv/bin/manim -qh -r 2560,1440 --fps 30 <video>.py <Scene>          # 16:9 cho YouTube (1440p)
-.venv/bin/manim -qh --fps 30 <video>.py <Scene>                       # 16:9 cho fanpage Facebook (1080p)
-BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 <video>.py <Scene>   # 9:16, tự đổi khung hình, không cần -r
+BIT_FORMAT=vertical .venv/bin/manim -qh -r 1440,2560 --fps 30 <video>.py <Scene>   # 9:16 cho Shorts + Reels (1440p)
 .venv/bin/manim -ql <video>.py <Scene>                                # xem nhanh, chất lượng thấp
 BIT_VOICE=0 ...                                                       # render không có lồng tiếng
 .venv/bin/manim -s -r 2048,2048 recursion.py ChannelAvatar            # avatar kênh (vuông)
@@ -52,7 +52,7 @@ Render chất lượng cao mất vài phút, nên chạy ở chế độ nền.
 ## Quy ước chung (áp dụng cho mọi video)
 
 ### Hai tỉ lệ trong cùng một file
-- `VERTICAL = BIT_FORMAT == "vertical"`. Khung dọc rộng 8 × cao 14.22 đơn vị, cùng 135 px/đơn vị như khung 16:9 (14.22 × 8), nên mọi thứ giữ nguyên kích thước.
+- `VERTICAL = BIT_FORMAT == "vertical"`. Khung dọc rộng 8 × cao 14.22 đơn vị, cùng mật độ điểm ảnh như khung 16:9 (14.22 × 8; 180 px/đơn vị ở 1440p), nên mọi thứ giữ nguyên kích thước. Không có `-r` thì `BIT_FORMAT=vertical` tự đảo khung -qh 1920×1080 thành 1080×1920.
 - `pick(wide, tall)` trả về giá trị theo tỉ lệ đang render. Mọi tọa độ hoặc kích thước khác nhau giữa hai bản đều đi qua `pick()`. Đặt vị trí theo `config.frame_width` / `frame_height` thay cho số cố định.
 - `SHORT = VERTICAL`: bản ngắn mở đầu bằng hook và cắt bớt nhịp chậm. Bọc phần chỉ có ở bản dài bằng `if not SHORT:`. **Bản 16:9 phải giữ nguyên** khi sửa cho bản dọc.
 
@@ -98,7 +98,7 @@ Lặp cho tới khi **ĐẠT**, rồi duyệt ảnh lưới theo checklist bằn
 |---|---|---|
 | Cache manim đã tắt | có `config.disable_caching = True` | sửa code |
 | Có file video, mới hơn code | mtime của mp4 ≥ mtime của file `.py` | render lại |
-| Độ phân giải / fps | `wide1440` 2560×1440, `wide` 1920×1080, `vertical` 1080×1920; 30fps | render lại |
+| Độ phân giải / fps | `wide` 2560×1440, `vertical` 1440×2560; 30fps | render lại |
 | Độ dài | 16:9 ≤ 600s; 9:16 cảnh báo > 75s, lỗi > 90s | sửa code |
 | Âm thanh đủ tới cuối | dừng trước hình ≤ 5s (bắt lỗi mất tiếng) | render lại |
 | Độ to | -14 ± 1.5 LUFS | render lại |
@@ -291,4 +291,4 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
 - **Khi thay đổi thiết kế** (watermark, bố cục, hiệu ứng): render vài phương án thành ảnh để người dùng chọn, kèm đề xuất của mình.
 - **File cho người dùng xem:** đặt trong project (ví dụ `media/...`), không để trong `/tmp`, và đưa link bấm được.
 - **Commit:** chỉ commit khi người dùng yêu cầu.
-- **Render nhiều video hoặc render lâu** (render lại tất cả, `qc.py --fix` cho nhiều video, bản 1440p): không tự chạy. Đưa lệnh cho người dùng tự chạy khi họ muốn. Render thử `-ql` một video để kiểm tra thay đổi thì vẫn được.
+- **Render nhiều video hoặc render lâu** (render lại tất cả, `qc.py --fix` cho nhiều video, bản -qh 1440p): không tự chạy. Đưa lệnh cho người dùng tự chạy khi họ muốn. Render thử `-ql` một video để kiểm tra thay đổi thì vẫn được.

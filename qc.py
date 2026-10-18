@@ -2,7 +2,7 @@
 
     .venv/bin/python qc.py                     # every video, both formats
     .venv/bin/python qc.py recursion           # one video
-    .venv/bin/python qc.py --format vertical   # one format: wide (1080p, Facebook), wide1440 (YouTube), vertical
+    .venv/bin/python qc.py --format vertical   # one format: wide (16:9 1440p, YouTube), vertical (9:16 1440p, Shorts/Reels)
     .venv/bin/python qc.py --fix               # re-render missing/stale/broken outputs, then check again
 
 Exits with 1 while any check fails. Reports and contact sheets (for the visual checklist in
@@ -39,8 +39,9 @@ VIDEOS = {
 }
 
 FORMATS = {
+    # YouTube gives uploads of 1440p and up a better encoder, so the 16:9 cut is rendered at 1440p.
     "wide": {
-        "size": (1920, 1080), "folder": "1080p30", "env": {},
+        "size": (2560, 1440), "folder": "1440p30", "env": {}, "args": ["-r", "2560,1440"],
         "duration": (None, 600),       # (warn above, fail above) in seconds
         "silence": (3.5, 6.0),         # longest pause in the soundtrack: (warn above, fail above)
         "hook": False,                 # first frame must already show the scene
@@ -56,8 +57,9 @@ FORMATS = {
         "interrupt_every": (30, 45),   # longest stretch without a new chapter or key moment
         "cta_tail": (12, 20),          # from the subscribe call to the end
     },
+    # One 1440x2560 file for both YouTube Shorts (1440p+ gets the better encoder) and Facebook Reels.
     "vertical": {
-        "size": (1080, 1920), "folder": "1920p30", "env": {"BIT_FORMAT": "vertical"},
+        "size": (1440, 2560), "folder": "2560p30", "env": {"BIT_FORMAT": "vertical"}, "args": ["-r", "1440,2560"],
         "duration": (75, 90),
         "silence": (2.5, 4.0),
         "hook": True,
@@ -73,10 +75,6 @@ FORMATS = {
         "cta_tail": (10, 15),
     },
 }
-
-# YouTube gives uploads of 1440p and up a better encoder, so the YouTube cut is rendered at 1440p.
-# The 1080p "wide" cut is the one for the Facebook page.
-FORMATS["wide1440"] = {**FORMATS["wide"], "size": (2560, 1440), "folder": "1440p30", "args": ["-r", "2560,1440"]}
 
 WPM = (120, 200)              # narration speed, words per minute
 SPEECH_SHARE = (0.3, 0.85)    # share of the runtime with narration
@@ -393,7 +391,7 @@ def show(name, fmt, movie, rep):
 def main():
     parser = argparse.ArgumentParser(description="Kiểm tra chất lượng video đã render.")
     parser.add_argument("videos", nargs="*", help=f"mặc định: tất cả ({', '.join(VIDEOS)})")
-    parser.add_argument("--format", choices=FORMATS, help="mặc định: cả ba bản (wide, wide1440, vertical)")
+    parser.add_argument("--format", choices=FORMATS, help="mặc định: cả hai bản (wide, vertical)")
     parser.add_argument("--fix", action="store_true", help="render lại khi lỗi có thể sửa bằng render")
     args = parser.parse_args()
     unknown = set(args.videos) - set(VIDEOS)
