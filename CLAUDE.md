@@ -110,7 +110,7 @@ Lặp cho tới khi **ĐẠT**, rồi duyệt ảnh lưới theo checklist bằn
 | Khung đầu có nội dung (hook) | ≥ 8% khung hình khác màu nền; bắt buộc ở 9:16, chỉ cảnh báo ở 16:9 | sửa code |
 | Watermark luôn hiện | có trong ≥ 95% khung hình mẫu (trừ 1.5s cuối) | sửa code |
 
-Ngưỡng nằm ở đầu `qc.py` (`FORMATS` và các hằng số). Khi thêm video mới, đăng ký nó trong `VIDEOS`.
+Ngưỡng nằm ở đầu `qc.py` (`FORMATS` và các hằng số). Khi thêm video mới, đăng ký nó trong `VIDEOS`; video chỉ có một tỉ lệ thì thêm `"formats": ["vertical"]`; video đặt watermark chỗ khác thì thêm `"mark"` (hộp theo tỉ lệ khung).
 
 ### Checklist độ thu hút, phần tự động (`[Thu hút]` trong `qc.py`)
 
@@ -265,6 +265,28 @@ Mọi video dưới đây đã qua đủ checklist tự động. Kết quả duy
 | docker_commands | 2:29 | 1:18 (cảnh báo > 75s) |
 
 Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Recursion ở trên. Ghi vào đây khi có số liệu.
+
+### `quick_sort.py`: Quicksort theo beat (chỉ bản 9:16, 16s)
+
+| Mục | Giá trị |
+|---|---|
+| Scene | `QuickSort` (+ `Thumbnail`, chỉ có bố cục dọc → `media/thumbnails/vertical/quick_sort.png`) |
+| Định dạng | Chỉ 9:16 (Shorts + Reels), 16s = 32 nhịp = 8 ô nhịp (`LENGTH`), để khi tự phát lại nhạc nối đúng nhịp và đúng hợp âm. Không có bản 16:9; `qc.py` đăng ký với `"formats": ["vertical"]` |
+| Ý chính | Partition kiểu Lomuto (pivot = phần tử cuối): quét một lượt, số ≤ pivot dồn sang trái, pivot nhảy vào **vị trí cuối cùng** của nó; lặp lại ở hai bên |
+| Mở đầu | Không có câu hỏi (người dùng chốt 2026-10-24). Khung đầu: 8 cột [5,8,3,7,1,6,2,4], Bit đứng trên pivot 4, khung code và dòng "Smaller than 4 goes LEFT" hiện sẵn. 2 nhịp đầu (1s) chỉ có nhạc và Bit nhún, rồi lượt quét mới chạy |
+| Phong cách | Kiểu bảng điều khiển: tiêu đề, chip STEP x/21, chip tốc độ (1× / 2×), trạng thái (PARTITIONING / SORTED), DEPTH, nhãn a[k]; đường kẻ đứt cam ngang tầm pivot (cột thấp hơn sẽ sang trái); nhãn "≤ 4" / "> 4" ở lượt quét đầu; viền trên của bảng là thanh tiến độ; chú thích màu trên thanh tiêu đề khung code. Code là hàm `quicksort(a, lo, hi)` đầy đủ 10 dòng; thanh highlight đi theo bước (`LINE`) và đổi màu theo việc dòng đó làm (`LINE_COLORS`): so sánh → `if a[j] <= pivot`, dồn trái → dòng hoán đổi, pivot hạ cánh → `# FINAL`, sang phần mới → lời gọi đệ quy trái/phải, phần 1 phần tử → `if lo >= hi: return` |
+| Watermark | Góc dưới phải (`watermark()` của `QuickSort`, theo yêu cầu người dùng 2026-10-24), nên phần đầu khung được nới lên. `qc.py` dùng hộp riêng `"mark"` trong `VIDEOS`. Lưu ý: trên Shorts/Reels góc này bị nút và biểu tượng âm thanh che khi xem trong app |
+| Tốc độ | 120 BPM, mỗi nhịp 15 khung. **1x rồi 2x** (người dùng chốt 2026-10-24): lượt quét đầu 1x, mỗi bước một nhịp, để người xem hiểu cách làm; đúng phách đầu ô nhịp 4 (6s) `speed_up()` chuyển sang 2x: banner "2× SPEED" loé trên bảng, chip đổi sang 2×, dòng "Now 2× speed!", từ đó mỗi bước nửa nhịp. `tick()` đặt mỗi lần play vào đúng khung tuyệt đối của nhịp (manim làm tròn mỗi play lên số khung nguyên); `sfx()` của scene đặt tiếng đúng lưới nhịp thay vì khung đã làm tròn |
+| Âm thanh | Hoán đổi: cất cánh với `swish`, chạm đất (`TOUCHDOWN`) với tiếng gõ gỗ `clack` + vòng sáng; pivot chạm đất bằng `thud`; mỗi cột được so sánh phát nốt riêng (ngũ cung La thứ). Nhạc (`lay_groove()`, đặt cuối cùng theo từng nốt móc kép; Am F C G mỗi hợp âm 2 nhịp): intro kick + hi-hat phách lẻ → groove 1x (clap phách 2/4, bass phách lẻ) → trống dồn 1 nhịp → groove 2x dày gấp đôi (hi-hat 16 nốt có hi-hat mở, bass lăn 16 nốt, pad hợp âm "nhún" theo kick, cymbal nhẹ) → đoạn dồn trùng phần sắp xếp cuối (`build_at`: tắt kick/bass/pad, snare dồn, tiếng rít) → **drop đúng phách đầu ô nhịp** vào SORTED (`drop_at`) với cymbal, pháo giấy, pad to hơn. `MIX_TRIM` hạ mọi thứ trừ đoạn dồn để đoạn dồn có chỗ to lên mà không vỡ tiếng. Tất cả do `make_beat_sfx()` tự sinh |
+| Bit | Đứng trên pivot, cưỡi pivot bay vào chỗ, nhảy sang pivot tiếp theo; nhún theo từng nhịp |
+| Giọng đọc | **Tạm tắt** (`narrated = False` trong `QuickSort`, từ 2026-10-24): chỉ có nhạc + chữ trên màn hình. Clip giọng của các câu cũ vẫn nằm trong cache; bật lại thì câu nào đã đổi chữ cần chạy TTS |
+| Câu chốt | "Pick a pivot. Split. Repeat." (mỗi cụm hiện đúng một nhịp, trên đợt sóng nốt đi lên) |
+| Câu đùa | Bit nhảy vào sắp xếp phần chỉ có 1 phần tử, nó đã xanh trước khi Bit chạm chân: "1 item? Sorted!" |
+| Kết thúc nối vòng | `rewind()`: các cột bay về thứ tự ban đầu, khung code, đường kẻ pivot và dòng chữ đầu hiện lại; video hết ngay khi cột hạ cánh, 2 nhịp nhún ở đầu làm khoảng nghỉ khi phát lại |
+| Gợi ý tiêu đề | "Quicksort in 16 Seconds #shorts" / "Quicksort, Cut to the Beat" |
+| Trạng thái | Render thử -ql 30fps (2026-10-24): checklist thu hút ĐẠT, -14.0 LUFS, đỉnh -1.2 dBTP, watermark 100%. Chưa render -qh |
+
+**Duyệt nội dung (2026-10-24):** S1 ⚠️ có hình cao trào ở 0s nhưng không có câu hỏi: người dùng chọn bỏ "Guess where 4 lands!" · S2 — (không có câu hỏi) · S3 ✅ một ý (pivot vào đúng chỗ), 3 bước: chọn pivot → quét → lặp hai bên · S4 ✅ code, màu cột, đường kẻ pivot chạy cùng nhịp · S5 ✅ câu đùa 1 phần tử ở 7s (dòng base case sáng lên) · S6 ✅ "Pick a pivot. Split. Repeat." · S7 ✅ tua ngược về khung đầu · S8 ✅ mọi dòng chữ ≤ 6 từ.
 
 ## Thêm video mới
 

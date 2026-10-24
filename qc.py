@@ -25,7 +25,8 @@ LIBRARY = ROOT / "bitbybit.py"
 QC_DIR = ROOT / "media" / "qc"
 BG = np.array([0x1B, 0x1E, 0x3C])
 
-# One entry per video: its source file and the scene to render.
+# One entry per video: its source file, the scene to render and, if not both, the formats it is made in;
+# "mark" is the watermark box when the video moves it (same form as FORMATS' "mark").
 VIDEOS = {
     "recursion": {"file": "recursion.py", "scene": "Recursion"},
     "off_by_one": {"file": "off_by_one.py", "scene": "OffByOne"},
@@ -36,6 +37,8 @@ VIDEOS = {
     "selection_sort": {"file": "selection_sort.py", "scene": "SelectionSort"},
     "git_commands": {"file": "git_commands.py", "scene": "GitCommands"},
     "docker_commands": {"file": "docker_commands.py", "scene": "DockerCommands"},
+    "quick_sort": {"file": "quick_sort.py", "scene": "QuickSort", "formats": ["vertical"],
+                   "mark": (0.73, 0.93, 0.97, 0.985)},  # bottom-right corner
 }
 
 FORMATS = {
@@ -246,7 +249,7 @@ def check(name, fmt):
 
     samples = frames(movie, small)
     body = samples[: max(1, int(duration - 1.5))]  # the watermark fades out with the last scene
-    coverage = np.mean([has_watermark(f, spec["mark"]) for f in body])
+    coverage = np.mean([has_watermark(f, video_cfg.get("mark", spec["mark"])) for f in body])
     rep.add("Watermark luôn hiện", coverage >= MARK_COVERAGE,
             f"có trong {coverage:.0%} khung hình mẫu (cần ≥ {MARK_COVERAGE:.0%})")
 
@@ -400,7 +403,8 @@ def main():
 
     all_passed = True
     for name in args.videos or VIDEOS:
-        for fmt in [args.format] if args.format else FORMATS:
+        made = VIDEOS[name].get("formats", list(FORMATS))
+        for fmt in [f for f in ([args.format] if args.format else FORMATS) if f in made]:
             movie, rep = check(name, fmt)
             # One re-render fixes anything caused by a stale or broken render; a second attempt never helps.
             if args.fix and rep.fixable:

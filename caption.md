@@ -11,3 +11,4 @@ Mỗi video một dòng, dùng chung cho YouTube, Shorts và Facebook Reels.
 7. **selection_sort:** Selection sort explained step by step with Python code, plus its O(n²) time complexity. #Algorithms #Python #Coding
 8. **git_commands:** 10 basic git commands for beginners: init, clone, status, add, commit, log, branch, switch, merge, push. #Git #Coding
 9. **docker_commands:** 10 basic Docker commands for beginners: pull, images, run, ps, logs, exec, stop, rm, build, compose up. #Docker #Coding
+10. **quick_sort:** Quicksort in 16 seconds: pick a pivot, sweep once so smaller items go left, and the pivot lands in its final spot. Repeat on each side. #Quicksort #Algorithms #Coding
