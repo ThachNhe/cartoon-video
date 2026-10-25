@@ -7,7 +7,7 @@ swaps take off with a swish and land with a clack. Bit rides each pivot into its
 hops to the next one. The last part builds up into a drop on SORTED, and the video is 8 bars long,
 so the rewind at the end loops straight back into the first frame, in time and in key.
 
-Render:   BIT_FORMAT=vertical .venv/bin/manim -qh -r 1440,2560 --fps 30 quick_sort.py QuickSort
+Render:   BIT_FORMAT=vertical .venv/bin/manim -qh -r 1080,1920 --fps 60 quick_sort.py QuickSort
 Preview:  BIT_FORMAT=vertical .venv/bin/manim -ql --fps 30 quick_sort.py QuickSort
 Cover:    BIT_FORMAT=vertical .venv/bin/manim -s -r 1080,1920 -o Thumbnail_vertical quick_sort.py Thumbnail
 """

@@ -4,9 +4,9 @@ Each command is typed in a terminal, prints what Docker prints, and moves things
 the registry (Docker Hub), the images on your machine and the containers running from them.
 The key idea, said early and kept as the takeaway: an image is the recipe, a container the cake.
 
-Render:  .venv/bin/manim -qh --fps 30 docker_commands.py DockerCommands
+Render:  .venv/bin/manim -qh --fps 60 docker_commands.py DockerCommands
 Vertical 9:16 (Shorts/Reels):
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 docker_commands.py DockerCommands
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 docker_commands.py DockerCommands
 Thumbnail: .venv/bin/manim -s -r 1280,720 docker_commands.py Thumbnail
 """
 

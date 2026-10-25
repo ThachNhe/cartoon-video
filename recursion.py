@@ -2,13 +2,13 @@
 
 The shared parts (Bit, branding, narrator, sound effects, the subscribe ending) live in bitbybit.py.
 
-Render:  .venv/bin/manim -qh --fps 30 recursion.py Recursion
+Render:  .venv/bin/manim -qh --fps 60 recursion.py Recursion
 Preview: .venv/bin/manim -ql recursion.py Recursion
 Set BIT_VOICE=0 to render without narration.
 
 Vertical 9:16 for YouTube Shorts / Facebook Reels (lands in media/videos/recursion/1920p30/).
 It opens on a hook and uses a tighter cut than the 16:9 video:
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 recursion.py Recursion
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 recursion.py Recursion
 
 Channel avatar (2048x2048 PNG; the round one has a transparent outside):
     .venv/bin/manim -s -r 2048,2048 recursion.py ChannelAvatar

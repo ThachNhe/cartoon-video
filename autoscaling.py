@@ -10,7 +10,7 @@ first frame, so the replay loops in time (and in key, with the beat track on).
 The beat track (drums, bass and pads from Quicksort's make_beat_sfx()) is off for now: `music = False`.
 The server sounds are synthesized by make_scale_sfx(). Icons are Material Design Icons (assets/icons/, Pictogrammers Free License).
 
-Render:   BIT_FORMAT=vertical .venv/bin/manim -qh -r 1440,2560 --fps 30 autoscaling.py AutoScaling
+Render:   BIT_FORMAT=vertical .venv/bin/manim -qh -r 1080,1920 --fps 60 autoscaling.py AutoScaling
 Preview:  BIT_FORMAT=vertical .venv/bin/manim -ql --fps 30 autoscaling.py AutoScaling
 Cover:    BIT_FORMAT=vertical .venv/bin/manim -s -r 1080,1920 -o Thumbnail_vertical autoscaling.py Thumbnail
 """

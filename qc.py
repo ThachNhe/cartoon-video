@@ -2,7 +2,7 @@
 
     .venv/bin/python qc.py                     # every video, both formats
     .venv/bin/python qc.py recursion           # one video
-    .venv/bin/python qc.py --format vertical   # one format: wide (16:9 1440p, YouTube), vertical (9:16 1440p, Shorts/Reels)
+    .venv/bin/python qc.py --format vertical   # one format: wide (16:9 1080p60, YouTube), vertical (9:16 1080p60, Shorts/Reels)
     .venv/bin/python qc.py --fix               # re-render missing/stale/broken outputs, then check again
 
 Exits with 1 while any check fails. Reports and contact sheets (for the visual checklist in
@@ -39,14 +39,16 @@ VIDEOS = {
     "docker_commands": {"file": "docker_commands.py", "scene": "DockerCommands"},
     "autoscaling": {"file": "autoscaling.py", "scene": "AutoScaling", "formats": ["vertical"],
                     "mark": (0.73, 0.93, 0.97, 0.985)},  # bottom-right corner, like quick_sort
+    "bfs_dfs": {"file": "bfs_dfs.py", "scene": "BfsDfs", "formats": ["vertical"],
+                "mark": (0.73, 0.93, 0.97, 0.985)},  # bottom-right corner, like quick_sort
     "quick_sort": {"file": "quick_sort.py", "scene": "QuickSort", "formats": ["vertical"],
                    "mark": (0.73, 0.93, 0.97, 0.985)},  # bottom-right corner
 }
 
 FORMATS = {
-    # YouTube gives uploads of 1440p and up a better encoder, so the 16:9 cut is rendered at 1440p.
+    # 1080p at 60fps for both cuts (the user's choice, 2026-10-25: higher resolutions buy nothing here).
     "wide": {
-        "size": (2560, 1440), "folder": "1440p30", "env": {}, "args": ["-r", "2560,1440"],
+        "size": (1920, 1080), "folder": "1080p60", "env": {}, "args": ["-r", "1920,1080"],
         "duration": (None, 600),       # (warn above, fail above) in seconds
         "silence": (3.5, 6.0),         # longest pause in the soundtrack: (warn above, fail above)
         "hook": False,                 # first frame must already show the scene
@@ -62,9 +64,9 @@ FORMATS = {
         "interrupt_every": (30, 45),   # longest stretch without a new chapter or key moment
         "cta_tail": (12, 20),          # from the subscribe call to the end
     },
-    # One 1440x2560 file for both YouTube Shorts (1440p+ gets the better encoder) and Facebook Reels.
+    # One 1080x1920 file for both YouTube Shorts and Facebook Reels.
     "vertical": {
-        "size": (1440, 2560), "folder": "2560p30", "env": {"BIT_FORMAT": "vertical"}, "args": ["-r", "1440,2560"],
+        "size": (1080, 1920), "folder": "1920p60", "env": {"BIT_FORMAT": "vertical"}, "args": ["-r", "1080,1920"],
         "duration": (75, 90),
         "silence": (2.5, 4.0),
         "hook": True,
@@ -86,7 +88,7 @@ SPEECH_SHARE = (0.3, 0.85)    # share of the runtime with narration
 READING_WPS = 3.0             # a bubble stays up at least words / READING_WPS seconds
 SURPRISES = {"gag", "surprise", "joke"}
 
-FPS = 30
+FPS = 60
 LUFS_TARGET, LUFS_TOLERANCE, MAX_PEAK = -14.0, 1.5, -1.0
 MAX_AUDIO_GAP = 5.0       # the soundtrack may stop this long before the picture (final fade)
 MAX_FREEZE = 6.0          # a picture that does not change for longer is worth a look

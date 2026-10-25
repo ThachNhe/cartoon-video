@@ -5,9 +5,9 @@ Not a Python bug: every language does it (IEEE 754). Binary builds numbers out o
 store: floats are marks on a ruler. 0.3 rounds to one mark, 0.1 + 0.2 lands on the next one.
 Compare floats with math.isclose(), never with ==.
 
-Render:  .venv/bin/manim -qh --fps 30 floating_point.py FloatingPoint
+Render:  .venv/bin/manim -qh --fps 60 floating_point.py FloatingPoint
 Vertical 9:16 (Shorts/Reels):
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 floating_point.py FloatingPoint
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 floating_point.py FloatingPoint
 Thumbnail: .venv/bin/manim -s -r 1280,720 floating_point.py Thumbnail
 """
 

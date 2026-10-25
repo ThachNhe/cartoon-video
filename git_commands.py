@@ -4,9 +4,9 @@ Every command is typed in a terminal, prints what git really prints, and moves t
 diagram of the four places git keeps your work: working directory, staging area, repository
 and the remote (GitHub). The 16:9 video adds a tip per command; the Short is rapid-fire.
 
-Render:  .venv/bin/manim -qh --fps 30 git_commands.py GitCommands
+Render:  .venv/bin/manim -qh --fps 60 git_commands.py GitCommands
 Vertical 9:16 (Shorts/Reels):
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 git_commands.py GitCommands
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 git_commands.py GitCommands
 Thumbnail: .venv/bin/manim -s -r 1280,720 git_commands.py Thumbnail
 """
 

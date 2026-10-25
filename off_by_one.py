@@ -3,9 +3,9 @@
 Bit hops along the list's items like stepping stones; `while i <= len(fruits)` makes him step
 onto index 3, which does not exist, and he falls into an IndexError. The fix is one character.
 
-Render:  .venv/bin/manim -qh --fps 30 off_by_one.py OffByOne
+Render:  .venv/bin/manim -qh --fps 60 off_by_one.py OffByOne
 Vertical 9:16 (Shorts/Reels):
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 off_by_one.py OffByOne
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 off_by_one.py OffByOne
 Thumbnail: .venv/bin/manim -s -r 1280,720 off_by_one.py Thumbnail
 """
 

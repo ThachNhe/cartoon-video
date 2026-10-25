@@ -3,9 +3,9 @@
 The title itself gets selection-sorted into place. Then six bars are sorted pass by pass with a
 comparison counter, the code is walked through (16:9), and the cost: n(n-1)/2 comparisons.
 
-Render:  .venv/bin/manim -qh --fps 30 selection_sort.py SelectionSort
+Render:  .venv/bin/manim -qh --fps 60 selection_sort.py SelectionSort
 Vertical 9:16 (Shorts/Reels):
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 selection_sort.py SelectionSort
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 selection_sort.py SelectionSort
 Thumbnail: .venv/bin/manim -s -r 1280,720 selection_sort.py Thumbnail
 """
 

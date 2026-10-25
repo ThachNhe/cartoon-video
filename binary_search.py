@@ -3,9 +3,9 @@
 Bit first scans a list one tile at a time, then halves it: four guesses instead of eleven,
 and twenty guesses for a million items. The catch: the list must be sorted.
 
-Render:  .venv/bin/manim -qh --fps 30 binary_search.py BinarySearch
+Render:  .venv/bin/manim -qh --fps 60 binary_search.py BinarySearch
 Vertical 9:16 (Shorts/Reels):
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 binary_search.py BinarySearch
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 binary_search.py BinarySearch
 Thumbnail: .venv/bin/manim -s -r 1280,720 binary_search.py Thumbnail
 """
 

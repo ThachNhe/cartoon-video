@@ -4,9 +4,9 @@ Searching a list checks names one by one. A dict runs the key through hash(), ta
 remainder by the number of buckets and goes straight to that bucket. Two keys can land in
 the same bucket (a collision); the bucket keeps a short list and stays fast.
 
-Render:  .venv/bin/manim -qh --fps 30 hash_map.py HashMap
+Render:  .venv/bin/manim -qh --fps 60 hash_map.py HashMap
 Vertical 9:16 (Shorts/Reels):
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 hash_map.py HashMap
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 hash_map.py HashMap
 Thumbnail: .venv/bin/manim -s -r 1280,720 hash_map.py Thumbnail
 """
 

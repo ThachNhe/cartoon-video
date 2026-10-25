@@ -4,8 +4,10 @@ Kênh **BitByBit** làm video hoạt hình ngắn giải thích khái niệm l�
 
 | Dạng | Tỉ lệ | Nền tảng |
 |---|---|---|
-| Bản đầy đủ | 16:9, 2560×1440 | YouTube (video thường). YouTube nén video từ 1440p trở lên bằng chuẩn tốt hơn, chữ trong code nét hơn |
-| Bản ngắn | 9:16, 1440×2560 | YouTube Shorts + Facebook Reels: một file dùng cho cả hai (YouTube nén Shorts 1440p tốt hơn; Facebook tự thu về 1080×1920) |
+| Bản đầy đủ | 16:9, 1920×1080, 60fps | YouTube (video thường) |
+| Bản ngắn | 9:16, 1080×1920, 60fps | YouTube Shorts + Facebook Reels: một file dùng cho cả hai |
+
+Độ phân giải 1080p, 60fps cho mọi video (người dùng chốt 2026-10-25: cao hơn không được gì; bỏ chuẩn 1440p30 trước đó).
 
 Fanpage Facebook chỉ đăng Reels (bản 9:16). Không làm bản 16:9 1080p cho Facebook nữa (bỏ từ 2026-10-18).
 
@@ -28,18 +30,19 @@ caption.md           Caption đăng bài của từng video (YouTube, Shorts/Ree
 channel_art.py       Ảnh bìa fanpage Facebook (1640×856, 3 phương án); bản đã xuất ở media/channel_art/
 assets/fonts/        Poppins (chữ thường), JetBrains Mono NL (code; bản NL không có ligature, manim cần vậy)
 assets/icons/        Icon SVG của Material Design Icons (giấy phép Pictogrammers Free License, file LICENSE đi kèm)
+assets/maps/         Bản đồ đường phố đã xử lý từ OpenStreetMap (ODbL, phải ghi nguồn trong video): giao lộ + đường, json.gz
 assets/sfx/          Hiệu ứng âm thanh, tự sinh bằng make_sfx() nếu thiếu file
 assets/voice/        Cache giọng đọc đã tạo (được commit, nên render lại không cần chạy TTS)
 assets/voice_ref/    Giọng mẫu: dave.pt (codes đã encode), dave.txt (transcript)
-media/videos/<video>/1440p30/   Bản 16:9 cho YouTube (2560×1440)
-media/videos/<video>/2560p30/   Bản 9:16 cho Shorts + Reels (1440×2560)
+media/videos/<video>/1080p60/   Bản 16:9 cho YouTube (1920×1080, 60fps)
+media/videos/<video>/1920p60/   Bản 9:16 cho Shorts + Reels (1080×1920, 60fps)
 ```
 
 ## Render
 
 ```bash
-.venv/bin/manim -qh -r 2560,1440 --fps 30 <video>.py <Scene>          # 16:9 cho YouTube (1440p)
-BIT_FORMAT=vertical .venv/bin/manim -qh -r 1440,2560 --fps 30 <video>.py <Scene>   # 9:16 cho Shorts + Reels (1440p)
+.venv/bin/manim -qh -r 1920,1080 --fps 60 <video>.py <Scene>          # 16:9 cho YouTube (1080p60)
+BIT_FORMAT=vertical .venv/bin/manim -qh -r 1080,1920 --fps 60 <video>.py <Scene>   # 9:16 cho Shorts + Reels (1080p60)
 .venv/bin/manim -ql <video>.py <Scene>                                # xem nhanh, chất lượng thấp
 BIT_VOICE=0 ...                                                       # render không có lồng tiếng
 .venv/bin/manim -s -r 2048,2048 recursion.py ChannelAvatar            # avatar kênh (vuông)
@@ -55,7 +58,7 @@ Render chất lượng cao mất vài phút, nên chạy ở chế độ nền.
 ## Quy ước chung (áp dụng cho mọi video)
 
 ### Hai tỉ lệ trong cùng một file
-- `VERTICAL = BIT_FORMAT == "vertical"`. Khung dọc rộng 8 × cao 14.22 đơn vị, cùng mật độ điểm ảnh như khung 16:9 (14.22 × 8; 180 px/đơn vị ở 1440p), nên mọi thứ giữ nguyên kích thước. Không có `-r` thì `BIT_FORMAT=vertical` tự đảo khung -qh 1920×1080 thành 1080×1920.
+- `VERTICAL = BIT_FORMAT == "vertical"`. Khung dọc rộng 8 × cao 14.22 đơn vị, cùng mật độ điểm ảnh như khung 16:9 (14.22 × 8; 135 px/đơn vị ở 1080p), nên mọi thứ giữ nguyên kích thước. Không có `-r` thì `BIT_FORMAT=vertical` tự đảo khung -qh 1920×1080 thành 1080×1920.
 - `pick(wide, tall)` trả về giá trị theo tỉ lệ đang render. Mọi tọa độ hoặc kích thước khác nhau giữa hai bản đều đi qua `pick()`. Đặt vị trí theo `config.frame_width` / `frame_height` thay cho số cố định.
 - `SHORT = VERTICAL`: bản ngắn mở đầu bằng hook và cắt bớt nhịp chậm. Bọc phần chỉ có ở bản dài bằng `if not SHORT:`. **Bản 16:9 phải giữ nguyên** khi sửa cho bản dọc.
 
@@ -101,7 +104,7 @@ Lặp cho tới khi **ĐẠT**, rồi duyệt ảnh lưới theo checklist bằn
 |---|---|---|
 | Cache manim đã tắt | có `config.disable_caching = True` | sửa code |
 | Có file video, mới hơn code | mtime của mp4 ≥ mtime của file `.py` | render lại |
-| Độ phân giải / fps | `wide` 2560×1440, `vertical` 1440×2560; 30fps | render lại |
+| Độ phân giải / fps | `wide` 1920×1080, `vertical` 1080×1920; 60fps | render lại |
 | Độ dài | 16:9 ≤ 600s; 9:16 cảnh báo > 75s, lỗi > 90s | sửa code |
 | Âm thanh đủ tới cuối | dừng trước hình ≤ 5s (bắt lỗi mất tiếng) | render lại |
 | Độ to | -14 ± 1.5 LUFS | render lại |
@@ -277,7 +280,7 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
 | Mở đầu | Không có câu hỏi (người dùng chốt 2026-10-24). Khung đầu: 8 cột [5,8,3,7,1,6,2,4], Bit đứng trên pivot 4, khung code và dòng "Smaller than 4 goes LEFT" hiện sẵn. 2 nhịp đầu (1s) chỉ có nhạc và Bit nhún, rồi lượt quét mới chạy |
 | Phong cách | Kiểu bảng điều khiển: tiêu đề, chip STEP x/21, chip tốc độ (1× / 2×), trạng thái (PARTITIONING / SORTED), DEPTH, nhãn a[k]; đường kẻ đứt cam ngang tầm pivot (cột thấp hơn sẽ sang trái); nhãn "≤ 4" / "> 4" ở lượt quét đầu; viền trên của bảng là thanh tiến độ; chú thích màu trên thanh tiêu đề khung code. Code là hàm `quicksort(a, lo, hi)` đầy đủ 10 dòng; thanh highlight đi theo bước (`LINE`) và đổi màu theo việc dòng đó làm (`LINE_COLORS`): so sánh → `if a[j] <= pivot`, dồn trái → dòng hoán đổi, pivot hạ cánh → `# FINAL`, sang phần mới → lời gọi đệ quy trái/phải, phần 1 phần tử → `if lo >= hi: return` |
 | Watermark | Góc dưới phải (`watermark()` của `QuickSort`, theo yêu cầu người dùng 2026-10-24), nên phần đầu khung được nới lên. `qc.py` dùng hộp riêng `"mark"` trong `VIDEOS`. Lưu ý: trên Shorts/Reels góc này bị nút và biểu tượng âm thanh che khi xem trong app |
-| Tốc độ | 120 BPM, mỗi nhịp 15 khung. **1x rồi 2x** (người dùng chốt 2026-10-24): lượt quét đầu 1x, mỗi bước một nhịp, để người xem hiểu cách làm; đúng phách đầu ô nhịp 4 (6s) `speed_up()` chuyển sang 2x: banner "2× SPEED" loé trên bảng, chip đổi sang 2×, dòng "Now 2× speed!", từ đó mỗi bước nửa nhịp. `tick()` đặt mỗi lần play vào đúng khung tuyệt đối của nhịp (manim làm tròn mỗi play lên số khung nguyên); `sfx()` của scene đặt tiếng đúng lưới nhịp thay vì khung đã làm tròn |
+| Tốc độ | 120 BPM, mỗi nhịp 30 khung ở 60fps (15 khung ở bản thử 30fps). **1x rồi 2x** (người dùng chốt 2026-10-24): lượt quét đầu 1x, mỗi bước một nhịp, để người xem hiểu cách làm; đúng phách đầu ô nhịp 4 (6s) `speed_up()` chuyển sang 2x: banner "2× SPEED" loé trên bảng, chip đổi sang 2×, dòng "Now 2× speed!", từ đó mỗi bước nửa nhịp. `tick()` đặt mỗi lần play vào đúng khung tuyệt đối của nhịp (manim làm tròn mỗi play lên số khung nguyên); `sfx()` của scene đặt tiếng đúng lưới nhịp thay vì khung đã làm tròn |
 | Âm thanh | Hoán đổi: cất cánh với `swish`, chạm đất (`TOUCHDOWN`) với tiếng gõ gỗ `clack` + vòng sáng; pivot chạm đất bằng `thud`; mỗi cột được so sánh phát nốt riêng (ngũ cung La thứ). Nhạc (`lay_groove()`, đặt cuối cùng theo từng nốt móc kép; Am F C G mỗi hợp âm 2 nhịp): intro kick + hi-hat phách lẻ → groove 1x (clap phách 2/4, bass phách lẻ) → trống dồn 1 nhịp → groove 2x dày gấp đôi (hi-hat 16 nốt có hi-hat mở, bass lăn 16 nốt, pad hợp âm "nhún" theo kick, cymbal nhẹ) → đoạn dồn trùng phần sắp xếp cuối (`build_at`: tắt kick/bass/pad, snare dồn, tiếng rít) → **drop đúng phách đầu ô nhịp** vào SORTED (`drop_at`) với cymbal, pháo giấy, pad to hơn. `MIX_TRIM` hạ mọi thứ trừ đoạn dồn để đoạn dồn có chỗ to lên mà không vỡ tiếng. Tất cả do `make_beat_sfx()` tự sinh |
 | Bit | Đứng trên pivot, cưỡi pivot bay vào chỗ, nhảy sang pivot tiếp theo; nhún theo từng nhịp |
 | Giọng đọc | **Tạm tắt** (`narrated = False` trong `QuickSort`, từ 2026-10-24): chỉ có nhạc + chữ trên màn hình. Clip giọng của các câu cũ vẫn nằm trong cache; bật lại thì câu nào đã đổi chữ cần chạy TTS |
@@ -309,6 +312,26 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
 
 **Duyệt nội dung (2026-10-25):** S1 ✅ khung đầu là dashboard với câu hỏi "1 server. Can it keep up?" · S2 ✅ không trụ được (CPU 100%, 503), autoscaler cứu · S3 ✅ một ý, 3 bước: đo CPU → thêm máy → bớt máy · S4 ✅ dòng code, chip, biểu đồ và máy chủ đổi cùng nhịp · S5 ✅ câu đùa "MIN 1" ở 12.5s · S6 ✅ "Busy? Scale OUT. Quiet? Scale IN." · S7 ✅ tua về khung đầu · S8 ✅ mọi dòng chữ ≤ 6 từ.
 
+### `bfs_dfs.py`: BFS vs DFS trên bản đồ San Francisco (chỉ bản 9:16, 24s, âm thanh từ thuật toán)
+
+| Mục | Giá trị |
+|---|---|
+| Scene | `BfsDfs` (+ `Thumbnail`, chỉ bố cục dọc → `media/thumbnails/vertical/bfs_dfs.png`) |
+| Định dạng | Chỉ 9:16, 24s = 48 nhịp = 12 ô nhịp ở 120 BPM (`LENGTH`), 3 vòng hợp âm Am F C G (mỗi hợp âm 1 ô nhịp), tua về khung đầu nên phát lại nối đúng nhịp và hợp âm. Không lồng tiếng. `qc.py` đăng ký với `"formats": ["vertical"]` và hộp `"mark"` góc dưới phải |
+| Ý chính | Cùng một vòng lặp tìm kiếm, chỉ khác `q.popleft()` (queue → BFS, lan theo vòng) và `q.pop()` (stack → DFS, lao sâu một đường). BFS cho ít giao lộ nhất, không phải ít dặm nhất (đường ngắn nhất theo dặm là Dijkstra) |
+| Bố cục | Tham khảo video "BFS vs DFS" người dùng gửi (2026-10-25): tiêu đề giãn chữ "B F S  V S  D F S", tiêu đề lớn đổi theo từng đoạn, dòng số liệu "14,582 INTERSECTIONS • SAME START, SAME GOAL", hai bản đồ cạnh nhau (thanh đếm giao lộ đã kiểm tra, ghim xuất phát/đích, vài địa danh, dòng chú thích góc dưới biến thành đồng hồ "route x mi"), khung code "THE ONLY DIFFERENCE" (7 dòng, Bit đứng ở góc phải), thanh caption, dòng ghi nguồn OSM |
+| Bản đồ | San Francisco từ OpenStreetMap (Overpass, đường cho xe chạy; câu truy vấn trong docstring của `build_map()`), gộp điểm giữa đường còn 14,582 giao lộ / 21,103 đoạn đường, giữ mảng liên thông lớn nhất, đường một chiều tính hai chiều. Dựng lại: `.venv/bin/python bfs_dfs.py build <overpass.json>`. Xuất phát Golden Gate Bridge, đích Oracle Park (giao lộ gần nhất). DFS đẩy láng giềng theo thứ tự id OSM tăng dần (ghi ở dòng nguồn) |
+| Kết quả thật (tính lúc render) | BFS kiểm tra 10,644 giao lộ, đường 100 giao lộ, 7.8 dặm; DFS kiểm tra 7,742 (ít hơn 2,902, tới đích trước), đường 4,626 giao lộ, 248 dặm; Dijkstra 5.9 dặm. Mọi con số trên màn hình lấy từ `self.runs` / `best_miles` |
+| Vẽ bản đồ | `MapView` vẽ bằng pycairo đúng độ phân giải video (khử răng cưa), đường phố 3 cấp; cây tìm kiếm mọc dần theo `self.race` (cùng tốc độ cho hai bên: bên chậm hơn tới đích đúng nhịp 24), mép đang lan phát sáng (làm mờ Gauss, nhuộm màu bản đồ); tuyến đường lõi trắng viền màu. Mỗi khung gán lại `pixel_array` của `ImageMobject` |
+| Mạch (nhịp) | 0–4 khung đầu, câu hỏi "Which search finds the better route?" · 4–8 dòng `popleft()` sáng: "One line apart" · 8–24 drop: cuộc đua, "BFS spreads in rings..." / "...DFS dives down one road." / "Same pace. Who's first?" / "DFS reaches Oracle Park FIRST!" (twist) · 24–26 tuyến BFS 7.8 mi · 26–30 tuyến DFS, đồng hồ chạy · 30–32 "248 MILES?!", "DFS took the SCENIC route." (kèn buồn) · 32–40 drop 2: queue = oldest first = rings; dòng code đổi thành `pop()`: newest first = dives · 40–47 "Real miles? That's Dijkstra." + Subscribe · 47–48 tua về đầu |
+| Âm thanh | **Không dùng nhạc beat** (người dùng 2026-10-25: beat không hợp video này; `music = False`, `make_track()` vẫn giữ). Âm thanh chính là **tiếng của thuật toán** (`Sonifier`, trộn thành một track stereo lúc render): trong cuộc đua mỗi bên 30 nốt/giây theo thang ngũ cung La thứ; BFS (loa trái, tiếng chuông) leo cao dần theo số vòng đã lan, DFS (loa phải, tiếng gảy) lên xuống theo độ gần đích; mỗi bên kết bằng hợp âm khi tới đích (kèm chuông `bd_found_*`). Tuyến BFS: chuỗi nốt chạy lên rồi hợp âm; tuyến DFS: tràng nốt nhảy loạn, vị trí trái/phải đi theo con đường trên bản đồ, rồi kèn buồn `bd_wah`. Queue/stack ở phần giải thích: hợp âm chuông / hợp âm gảy. Tua về đầu: chuỗi nốt trượt xuống. Dưới tất cả là lớp nền Am(add9) rất nhỏ (khoảng -24 dB), không nhịp, số chu kỳ chẵn nên nối vòng liền |
+| Câu chốt | "Queue spreads. Stack dives." / "BFS: fewest stops. DFS: any path." |
+| Câu đùa | Tuyến DFS 248 dặm phủ kín thành phố: "DFS took the SCENIC route." |
+| Gợi ý tiêu đề | "BFS vs DFS: One Line, 240 Extra Miles #shorts" / "BFS vs DFS on a Real Map of San Francisco" |
+| Trạng thái | Render thử -ql 30fps với âm thanh thuật toán (2026-10-25): `qc.py` ĐẠT, không cảnh báo, -13.5 LUFS, đỉnh -1.5 dBTP, watermark 100%. Chưa render -qh (1080p60) |
+
+**Duyệt nội dung (2026-10-25):** S1 ✅ khung đầu có hai bản đồ, ghim và câu hỏi "Which search finds the better route?" · S2 ✅ BFS: 7.8 mi so với 248 mi · S3 ✅ một ý (queue vs stack), 3 bước: cùng vòng lặp → đua → so tuyến · S4 ✅ bản đồ, bộ đếm, dòng code đổi cùng nhịp · S5 ✅ "248 MILES?!" ở 15s · S6 ✅ "Queue spreads. Stack dives." · S7 ✅ tua về khung đầu · S8 ✅ mọi caption ≤ 6 từ.
+
 ## Thêm video mới
 
 1. Tạo `<topic>.py`: `from bitbybit import *`, một class kế thừa `BitScene`. Mẫu gọn nhất là `off_by_one.py`, `aliasing.py`. Các hàm dựng sẵn trong `BitScene`:
@@ -337,4 +360,4 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
 - **Khi thay đổi thiết kế** (watermark, bố cục, hiệu ứng): render vài phương án thành ảnh để người dùng chọn, kèm đề xuất của mình.
 - **File cho người dùng xem:** đặt trong project (ví dụ `media/...`), không để trong `/tmp`, và đưa link bấm được.
 - **Commit:** chỉ commit khi người dùng yêu cầu.
-- **Render nhiều video hoặc render lâu** (render lại tất cả, `qc.py --fix` cho nhiều video, bản -qh 1440p): không tự chạy. Đưa lệnh cho người dùng tự chạy khi họ muốn. Render thử `-ql` một video để kiểm tra thay đổi thì vẫn được.
+- **Render nhiều video hoặc render lâu** (render lại tất cả, `qc.py --fix` cho nhiều video, bản -qh 1080p60): không tự chạy. Đưa lệnh cho người dùng tự chạy khi họ muốn. Render thử `-ql` một video để kiểm tra thay đổi thì vẫn được.

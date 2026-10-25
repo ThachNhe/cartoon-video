@@ -3,9 +3,9 @@
 Name tags point at list boxes: after `b = a` both tags point at the same box, so `b.append(4)`
 shows up in `a`. With `b = a.copy()` b gets its own box and `a` stays untouched.
 
-Render:  .venv/bin/manim -qh --fps 30 aliasing.py Aliasing
+Render:  .venv/bin/manim -qh --fps 60 aliasing.py Aliasing
 Vertical 9:16 (Shorts/Reels):
-    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 30 aliasing.py Aliasing
+    BIT_FORMAT=vertical .venv/bin/manim -qh --fps 60 aliasing.py Aliasing
 Thumbnail: .venv/bin/manim -s -r 1280,720 aliasing.py Thumbnail
 """
 

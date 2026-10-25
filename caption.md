@@ -13,3 +13,4 @@ Mỗi video một dòng, dùng chung cho YouTube, Shorts và Facebook Reels.
 9. **docker_commands:** 10 basic Docker commands for beginners: pull, images, run, ps, logs, exec, stop, rm, build, compose up. #Docker #Coding
 10. **quick_sort:** Quicksort in 16 seconds: pick a pivot, sweep once so smaller items go left, and the pivot lands in its final spot. Repeat on each side. #Quicksort #Algorithms #Coding
 11. **autoscaling:** Autoscaling in 20 seconds: CPU over 70%? The autoscaler adds servers. Under 30%? It removes them, but never the last one (min 1, max 4). #Autoscaling #Cloud #DevOps
+12. **bfs_dfs:** BFS vs DFS on San Francisco's real road map, Golden Gate Bridge to Oracle Park: same loop, one line apart (popleft vs pop). DFS checked fewer intersections, then drove 248 miles. Road data © OpenStreetMap contributors. #BFS #DFS #Algorithms #Coding
