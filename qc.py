@@ -37,6 +37,8 @@ VIDEOS = {
     "selection_sort": {"file": "selection_sort.py", "scene": "SelectionSort"},
     "git_commands": {"file": "git_commands.py", "scene": "GitCommands"},
     "docker_commands": {"file": "docker_commands.py", "scene": "DockerCommands"},
+    "autoscaling": {"file": "autoscaling.py", "scene": "AutoScaling", "formats": ["vertical"],
+                    "mark": (0.73, 0.93, 0.97, 0.985)},  # bottom-right corner, like quick_sort
     "quick_sort": {"file": "quick_sort.py", "scene": "QuickSort", "formats": ["vertical"],
                    "mark": (0.73, 0.93, 0.97, 0.985)},  # bottom-right corner
 }

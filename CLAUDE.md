@@ -27,6 +27,7 @@ qc.py                Kiểm tra chất lượng video đã render, tự render l
 caption.md           Caption đăng bài của từng video (YouTube, Shorts/Reels)
 channel_art.py       Ảnh bìa fanpage Facebook (1640×856, 3 phương án); bản đã xuất ở media/channel_art/
 assets/fonts/        Poppins (chữ thường), JetBrains Mono NL (code; bản NL không có ligature, manim cần vậy)
+assets/icons/        Icon SVG của Material Design Icons (giấy phép Pictogrammers Free License, file LICENSE đi kèm)
 assets/sfx/          Hiệu ứng âm thanh, tự sinh bằng make_sfx() nếu thiếu file
 assets/voice/        Cache giọng đọc đã tạo (được commit, nên render lại không cần chạy TTS)
 assets/voice_ref/    Giọng mẫu: dave.pt (codes đã encode), dave.txt (transcript)
@@ -287,6 +288,26 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
 | Trạng thái | Render thử -ql 30fps (2026-10-24): checklist thu hút ĐẠT, -14.0 LUFS, đỉnh -1.2 dBTP, watermark 100%. Chưa render -qh |
 
 **Duyệt nội dung (2026-10-24):** S1 ⚠️ có hình cao trào ở 0s nhưng không có câu hỏi: người dùng chọn bỏ "Guess where 4 lands!" · S2 — (không có câu hỏi) · S3 ✅ một ý (pivot vào đúng chỗ), 3 bước: chọn pivot → quét → lặp hai bên · S4 ✅ code, màu cột, đường kẻ pivot chạy cùng nhịp · S5 ✅ câu đùa 1 phần tử ở 7s (dòng base case sáng lên) · S6 ✅ "Pick a pivot. Split. Repeat." · S7 ✅ tua ngược về khung đầu · S8 ✅ mọi dòng chữ ≤ 6 từ.
+
+### `autoscaling.py`: Autoscaling theo beat (chỉ bản 9:16, 20s)
+
+| Mục | Giá trị |
+|---|---|
+| Scene | `AutoScaling` (+ `Thumbnail`, chỉ có bố cục dọc → `media/thumbnails/vertical/autoscaling.png`) |
+| Định dạng | Chỉ 9:16, cùng phong cách Quicksort (người dùng chọn 2026-10-25): 20s = 40 nhịp = 10 ô nhịp (`LENGTH`) ở 120 BPM: mọi chuyển động và tiếng động đặt theo lưới nhịp, tua về khung đầu để phát lại liền mạch. Không lồng tiếng, chỉ có tiếng động + chữ trên màn hình. `qc.py` đăng ký với `"formats": ["vertical"]` |
+| Ý chính | Autoscaler theo CPU: > 70% thêm máy chủ, < 30% bớt máy chủ, luôn giữ trong khoảng min 1 / max 4 |
+| Bố cục | Thanh tiêu đề + chip (SERVERS n/4, USERS kèm mặt trời/mặt trăng, chi phí $/h, trạng thái STEADY / OVERLOAD / SCALING OUT / BALANCED / SCALING IN); viền trên của bảng là thanh tiến độ "một ngày"; trong bảng: hàng người dùng → load balancer → hàng 4 thẻ máy chủ (icon, tên, CPU %, thanh CPU) với Bit đứng trên máy chủ mới nhất; dòng chữ trạng thái; biểu đồ AVG CPU chạy liên tục (vạch 70% / 30%); khung code `autoscale(cpu, n)` với thanh highlight theo dòng đang chạy (`LINE`, `LINE_COLORS`). Cả khối bắt đầu từ y 5.15 (dịch xuống so với Quicksort theo yêu cầu người dùng); biểu đồ và khung code không được chồng nhau: khung code cần cao khoảng 2.07 ở bề rộng 7.2 (`CODE_TOP`/`CODE_BOTTOM`) |
+| Dashboard sống | Gói tin (chấm sáng) bay từ người dùng qua load balancer tới máy chủ, càng tải càng dày; máy chủ quá tải làm rơi gói tin đỏ. CPU từng máy dịu dần về `load / số máy đang chạy`. Mọi updater đi qua `live()`: manim chép updater sang bản sao của animation, bản sao không được tự vẽ lại (nếu không sẽ lỗi lệch số điểm) |
+| Watermark | Góc dưới phải như Quicksort (`watermark()`), `qc.py` dùng hộp `"mark"` riêng |
+| Mạch (nhịp) | 0–2 khung đầu: 1 máy 15%, "1 server. Can it keep up?" · 2–8 lưu lượng tăng vọt, CPU 100%, lỗi 503 · 8–16 dòng `cpu > 70` sáng, web-2..4 khởi động mỗi 2 nhịp, Bit nhảy sang máy mới (đoạn dồn từ nhịp 11) · 16 drop "Load shared. Nobody waits!" (pháo giấy, 2x) · 20–25 ban đêm, `cpu < 30` tắt từng máy · 25–30 câu đùa · 30–34 "Pay only for what you use." + "Busy? Scale OUT. / Quiet? Scale IN." · 34–39 Subscribe · 39–40 `rewind()` về khung đầu |
+| Âm thanh | **Nhạc beat tạm tắt** (`music = False` trong `AutoScaling`, người dùng yêu cầu 2026-10-25): chỉ còn tiếng động. Bật lại thì `lay_groove()` đặt trống, bass, pad, riser, cymbal của Quicksort (`make_beat_sfx()` import từ `quick_sort.py`, cũng dùng cho nốt, `thud`, `rewind`). Tiếng máy chủ do `make_scale_sfx()` tự sinh, căn theo lưới nhịp: `boot` (quạt quay lên, chuông 2 nốt rơi đúng nhịp máy chạy), `shutdown`, `alert` (dòng policy sáng), `overload`, `surge` (2 nhịp, đỉnh đúng lúc CPU 100%), `glitch` (503), `coin`, `tap`. Nhạc (khi bật): intro → 1x → đoạn dồn khi máy khởi động → drop 2x → ban đêm nửa nhịp → 1x có pad cho phần kết |
+| Câu chốt | "Busy? Scale OUT. Quiet? Scale IN." |
+| Câu đùa | `cpu < 30` định tắt nốt máy cuối cùng ("Remove the LAST one?!"), dòng `max(1, ...)` sáng lên, tem "MIN 1" đóng lên web-1: "Nope. MIN 1 stays on!" |
+| Kết thúc nối vòng | `rewind()`: biểu đồ và code hiện lại, chip về trạng thái đầu, thanh tiến độ về 0 |
+| Gợi ý tiêu đề | "Autoscaling in 20 Seconds #shorts" / "How Servers Scale Themselves (Autoscaling)" |
+| Trạng thái | Render thử -ql 30fps không nhạc (2026-10-25): `qc.py` ĐẠT, -14.1 LUFS, đỉnh -1.5 dBTP, khoảng lặng dài nhất 1.4s, watermark 100%; cảnh báo "đủ thời gian đọc chữ" (giống Quicksort, do nhịp nhanh). Chưa render -qh |
+
+**Duyệt nội dung (2026-10-25):** S1 ✅ khung đầu là dashboard với câu hỏi "1 server. Can it keep up?" · S2 ✅ không trụ được (CPU 100%, 503), autoscaler cứu · S3 ✅ một ý, 3 bước: đo CPU → thêm máy → bớt máy · S4 ✅ dòng code, chip, biểu đồ và máy chủ đổi cùng nhịp · S5 ✅ câu đùa "MIN 1" ở 12.5s · S6 ✅ "Busy? Scale OUT. Quiet? Scale IN." · S7 ✅ tua về khung đầu · S8 ✅ mọi dòng chữ ≤ 6 từ.
 
 ## Thêm video mới
 
