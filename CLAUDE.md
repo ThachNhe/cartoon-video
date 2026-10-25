@@ -242,31 +242,25 @@ Duyệt **trước khi render bản chính**, ghi kết quả vào mục của v
 
 Mọi video dưới đây đã qua đủ checklist tự động. Kết quả duyệt nội dung (S1–S8, Y1–Y6) giống nhau ở các điểm chung, nên chỉ ghi phần riêng:
 - **Đạt ở mọi video:** hook có câu hỏi; một ý chính; minh hoạ bằng hình; ít nhất một câu đùa; câu chốt ở cảnh kết; kết thúc nối vòng; câu hứa hẹn trước 15s ở bản dài; thumbnail; mốc chương tự sinh.
-- **Mở đầu khác nhau giữa các video:** gõ laptop (5 video đầu; bản ngắn của floating_point bỏ màn này), ô chữ tự sắp xếp (selection sort), đồ thị commit (git), container mở cửa (Docker).
+- **Mở đầu khác nhau giữa các video:** gõ laptop (off_by_one, floating_point, hash_map; bản ngắn của floating_point bỏ màn này), ô chữ tự sắp xếp (selection sort), đồ thị commit (git).
 
 | Video (file → Scene) | Ý chính & hook (Shorts) | Bố cục / điểm riêng | Câu chốt | Câu đùa | Thumbnail | Gợi ý tiêu đề YouTube |
 |---|---|---|---|---|---|---|
 | `off_by_one.py` → `OffByOne` | `while i <= len` đi quá 1 bước → `IndexError`. Hook: "Why does this loop crash on the LAST item?" | Ba hộp trái cây là bậc đá; Bit nhảy theo `i`, ngã vào ô 3 không tồn tại. Sửa: `<=` → `<` | "Count from 0, stop at len - 1." | 2 hard things: cache invalidation, naming, off-by-one | "ONE STEP TOO FAR!" | "Why Your Loop Crashes on the LAST Item (Off-by-One Error)" |
-| `binary_search.py` → `BinarySearch` | Kiểm tra phần giữa, bỏ một nửa. Hook: "Find 1 number in a MILLION in just 20 guesses?" | Hàng ô ngang (16:9) / cột dọc (9:16). Tuyến tính 11 lần vs nhị phân 4 lần; bộ đếm 1,000,000 → 1 sau 20 bước. Bản dài: phần "list chưa sắp xếp" | "Sorted list? Search in halves." | Binary search tìm chìa khoá: "Step one: sort the whole house." | "1,000,000 in 20 GUESSES" | "Find 1 Number in a MILLION in 20 Guesses (Binary Search)" |
-| `aliasing.py` → `Aliasing` | `b = a` không copy. Hook: "Why did my list change BY ITSELF?!" | Nhãn tên `a`/`b` trỏ vào cùng một hộp list; sửa bằng `a.copy()` | "= shares, .copy() copies." | a và b chia tay: "They shared EVERYTHING." | "WHO ADDED 4?!" | "Why Did My Python List Change By Itself? (b = a)" |
 | `floating_point.py` → `FloatingPoint` | Máy tính ghép số từ các nửa (1/2, 1/4…), 0.1 không ghép đúng được nên bị làm tròn; float là các vạch trên thước, 0.3 và 0.1 + 0.2 rơi vào hai vạch khác nhau. Hook: "Why isn't 0.1 + 0.2 equal to 0.3?!" (câu hỏi có sẵn ở khung đầu, Bit hỏi ngay từ 0s) | Bản ngắn bỏ màn gõ laptop: REPL của hook trượt lên rồi vào thẳng phần giải thích ("Not a bug!…"). Giải thích bản chất, Python chỉ là ví dụ: thẻ JS/Java/C#/Rust cùng ra 0.30000000000000004 (IEEE 754) → các nửa, 0.5 = 1/2 ✓ → thanh đo 1/16 + 1/32 + … không bao giờ tới 0.1 → giá trị lưu thật của 0.1/0.2 → thước với hai vạch 0.29999999999999999 / 0.30000000000000004 → `==` → False; sửa bằng `math.isclose`. Bản dài thêm 0.75, IEEE 754, so sánh 1/3 trong thập phân, "64 bits" | "Never compare floats with ==." | Ngân hàng dùng float: "$0.30000000000000004" | "0.1 + 0.2 = 0.30000000000000004 WHY?!" | "Why 0.1 + 0.2 Is NOT 0.3 in Python" |
 | `hash_map.py` → `HashMap` | `hash()` % số bucket → tra 1 bước. Hook: "How does Python find a key INSTANTLY?" | Máy `hash()`; 8 bucket; giá trị hash là minh hoạ (`HASHES`); va chạm Bit/Ada cùng bucket 4 | "Fast lookups? Use a dict." | Phòng không phải hash map: "Finding my socks takes O(n)." | "1 STEP. Not a million." | "How Python Dicts Find Any Key in ONE Step (Hash Maps)" |
 | `selection_sort.py` → `SelectionSort` | Tìm nhỏ nhất, đổi lên đầu, lặp lại. Hook: "Find the smallest. Swap. Repeat. That's it?!" | 6 cột [29,10,14,37,13,5] chạy **cùng khung code**: thanh highlight theo đúng dòng đang chạy (`goto()`: `for i` → `low = i` → `if a[j] < a[low]` → `low = j` → dòng hoán đổi); đếm so sánh (15; 9:16 đặt ở thanh tiêu đề khung code). Bản dài giải thích code trước khi chạy + O(n²); 1 triệu phần tử = 499,999,500,000 so sánh | "Find the smallest. Swap. Repeat." | Số nhỏ nhất tự tin: "It knows it'll be SELECTED first." | "PICK. SWAP. REPEAT." | "Selection Sort Explained Step by Step (with Code)" |
 | `git_commands.py` → `GitCommands` | 10 lệnh: init, clone, status, add, commit, log, branch, switch, merge, push (+pull ở bản dài). Hook: "Know these 10 git commands? You'll use them DAILY." | Terminal + sơ đồ Working dir → Staging → Repository → GitHub; vòng vàng là HEAD. Bản dài: mẹo mỗi lệnh + cheat sheet; bản ngắn: một câu ngắn mỗi lệnh | "status, add, commit, push. Repeat!" | "Too many COMMITMENT issues." | "10 GIT COMMANDS you'll use EVERY day" | "10 Git Commands You'll Use Every Day (Beginner Friendly)" |
-| `docker_commands.py` → `DockerCommands` | 10 lệnh: pull, images, run, ps, logs, exec, stop, rm, build, compose up. Hook: "It works on MY machine!" | Terminal + Docker Hub → Images → Containers; Bit chui vào container khi `exec`. Bản dài: mẹo + cheat sheet | "Image = recipe. Container = cake." | "Then we'll ship your machine. That's Docker!" | "10 DOCKER COMMANDS" | "10 Docker Commands Every Developer Needs (Image vs Container)" |
 
 **Độ dài (render 2026-10-18, tất cả ĐẠT QC), 16:9 / 9:16:**
 
 | Video | 16:9 | 9:16 |
 |---|---|---|
 | off_by_one | 1:13 | 1:11 |
-| binary_search | 1:23 | 1:07 |
-| aliasing | 1:11 | 1:03 |
 | floating_point | 1:22 | 1:07 |
 | hash_map | 1:24 | 1:07 |
 | selection_sort | 1:47 | 1:09 |
 | git_commands | 2:15 | 1:14 |
-| docker_commands | 2:29 | 1:18 (cảnh báo > 75s) |
 
 Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Recursion ở trên. Ghi vào đây khi có số liệu.
 
@@ -334,7 +328,7 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
 
 ## Thêm video mới
 
-1. Tạo `<topic>.py`: `from bitbybit import *`, một class kế thừa `BitScene`. Mẫu gọn nhất là `off_by_one.py`, `aliasing.py`. Các hàm dựng sẵn trong `BitScene`:
+1. Tạo `<topic>.py`: `from bitbybit import *`, một class kế thừa `BitScene`. Mẫu gọn nhất là `off_by_one.py`. Các hàm dựng sẵn trong `BitScene`:
    - `hook_open()` + `hook_visual()`: cold open của bản ngắn; `hook_look` làm cảnh nối vòng về khung đầu.
    - `title_intro()`: Bit gõ tiêu đề trên laptop.
    - `say()`: bong bóng thoại kèm lồng tiếng.
@@ -346,7 +340,7 @@ Bảng **số liệu sau khi đăng** cho mỗi video dùng cùng mẫu với Re
    - `shocked_bit()` / `knocked_bit()`: Bit hoảng hốt / Bit ngã mắt chữ X.
    - `ending()`: cảnh kết với tiêu đề câu chốt, thẻ kênh, Subscribe và cảnh nối vòng.
    - `discard()`: xoá hẳn một mobject. `Scene.remove()` không xoá các bộ phận đã bị animation tách ra; ví dụ Bit đã từng xoay tay.
-2. Dùng `pick()` / `SHORT` ngay từ đầu cho mọi bố cục. Ở bản dọc, đặt Bit sao cho bong bóng thoại không che thứ đang được giải thích. Nếu cần, viết hàm `line()` riêng chọn hướng bong bóng theo tỉ lệ, như `aliasing.py` và `binary_search.py`.
+2. Dùng `pick()` / `SHORT` ngay từ đầu cho mọi bố cục. Ở bản dọc, đặt Bit sao cho bong bóng thoại không che thứ đang được giải thích. Nếu cần, viết hàm `line()` riêng chọn hướng bong bóng theo tỉ lệ, như `selection_sort.py` và `git_commands.py`.
 3. Render xem nhanh bằng `-ql` ở cả hai tỉ lệ, rồi mới render `-qh`.
 4. Gắn `self.chapter(...)` cho từng phần, `self.moment(...)` ở các khoảnh khắc chính, và `captioned=True` cho câu đọc có chữ trên màn hình. Bản ngắn kết bằng cảnh nối vòng (`loop`).
 5. Làm thumbnail: `class Thumbnail(ThumbnailMixin, <Video>)` với `design()`. Khi người dùng muốn chọn, làm 2–3 phương án.

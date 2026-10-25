@@ -30,13 +30,10 @@ BG = np.array([0x1B, 0x1E, 0x3C])
 VIDEOS = {
     "recursion": {"file": "recursion.py", "scene": "Recursion"},
     "off_by_one": {"file": "off_by_one.py", "scene": "OffByOne"},
-    "binary_search": {"file": "binary_search.py", "scene": "BinarySearch"},
-    "aliasing": {"file": "aliasing.py", "scene": "Aliasing"},
     "floating_point": {"file": "floating_point.py", "scene": "FloatingPoint"},
     "hash_map": {"file": "hash_map.py", "scene": "HashMap"},
     "selection_sort": {"file": "selection_sort.py", "scene": "SelectionSort"},
     "git_commands": {"file": "git_commands.py", "scene": "GitCommands"},
-    "docker_commands": {"file": "docker_commands.py", "scene": "DockerCommands"},
     "autoscaling": {"file": "autoscaling.py", "scene": "AutoScaling", "formats": ["vertical"],
                     "mark": (0.73, 0.93, 0.97, 0.985)},  # bottom-right corner, like quick_sort
     "bfs_dfs": {"file": "bfs_dfs.py", "scene": "BfsDfs", "formats": ["vertical"],
